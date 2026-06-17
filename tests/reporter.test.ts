@@ -22,7 +22,7 @@ describe('Reporter', () => {
     expect(text).toContain('PST — Project Intelligence Report');
     expect(text).toContain('Languages');
     expect(text).toContain('Node.js');
-    expect(text).toContain('Install plan');
+    expect(text).toContain('Install Plan');
     expect(text).toContain('npm install');
   });
 
