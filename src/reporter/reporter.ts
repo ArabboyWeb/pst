@@ -111,7 +111,12 @@ export function renderText(scan: ProjectScanResult): string {
     for (const e of scan.env) {
       lines.push(`  ${chalk.yellow('●')} ${chalk.white(e.path)} ${chalk.dim(`(${e.kind})`)}`);
       for (const v of e.variables.slice(0, 12)) {
-        const def = v.defaultValue !== undefined ? chalk.dim(`=${v.defaultValue}`) : '';
+        const showVal = e.kind === 'example' && v.defaultValue !== undefined;
+        const def = showVal
+          ? chalk.dim(`=${v.defaultValue}`)
+          : v.defaultValue !== undefined
+            ? chalk.dim('=[set]')
+            : '';
         const req = v.required ? chalk.yellow.bold(' [required]') : '';
         lines.push(`      ${chalk.dim('•')} ${chalk.white(v.name)}${def}${req}`);
       }
@@ -244,7 +249,12 @@ export function renderMarkdown(scan: ProjectScanResult): string {
     for (const e of scan.env) {
       lines.push(`- \`${e.path}\` (${e.kind})`);
       for (const v of e.variables) {
-        const def = v.defaultValue !== undefined ? `=\`${v.defaultValue}\`` : '';
+        const showVal = e.kind === 'example' && v.defaultValue !== undefined;
+        const def = showVal
+          ? `=\`${v.defaultValue}\``
+          : v.defaultValue !== undefined
+            ? '=`[set]`'
+            : '';
         const req = v.required ? ' _(required)_' : '';
         lines.push(`  - \`${v.name}\`${def}${req}`);
       }

@@ -41,12 +41,16 @@ export class GenericDetector implements Detector {
           : ef === '.env'
             ? 'actual'
             : 'template';
+        // Only store defaultValues for example/template files, never for
+        // real .env files — those contain secrets that must not leak into
+        // reports, JSON output, screenshots, or CI logs.
+        const isExample = kind === 'example';
         const envFile: EnvFile = {
           path: ef,
           kind,
           variables: vars.map((v) => ({
             name: v.name,
-            defaultValue: v.value,
+            defaultValue: isExample ? v.value : undefined,
             required: kind === 'example',
             source: [ef],
           })),
