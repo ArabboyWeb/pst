@@ -1,6 +1,6 @@
 {
   "name": "pst-kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "PST — cross-language project intelligence and deployment assistant. Understand a repo fast. Set it up faster.",
   "type": "module",
   "license": "MIT",
