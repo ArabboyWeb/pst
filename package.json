@@ -8,7 +8,7 @@
   "homepage": "https://github.com/ArabboyWeb/pst",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ArabboyWeb/pst.git"
+    "url": "git+https://github.com/ArabboyWeb/pst.git"
   },
   "bugs": {
     "url": "https://github.com/ArabboyWeb/pst/issues"
@@ -26,7 +26,7 @@
     "docker"
   ],
   "bin": {
-    "pst": "./dist/cli.js"
+    "pst": "dist/cli.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
