@@ -1,0 +1,249 @@
+{
+  "root": "/home/z/my-project/pst/fixtures/python-app",
+  "schemaVersion": 1,
+  "scannedAt": "2026-06-17T04:39:56.193Z",
+  "languages": [
+    {
+      "id": "python",
+      "name": "Python",
+      "evidence": [
+        "pyproject.toml",
+        "requirements.txt"
+      ],
+      "confidence": {
+        "score": 0.95,
+        "level": "high",
+        "reason": "Found pyproject.toml, requirements.txt"
+      },
+      "versionConstraint": ">=3.10"
+    }
+  ],
+  "frameworks": [
+    {
+      "id": "fastapi",
+      "name": "FastAPI",
+      "evidence": [
+        "dep:fastapi"
+      ],
+      "confidence": {
+        "score": 0.8,
+        "level": "high",
+        "reason": "dep:fastapi"
+      }
+    }
+  ],
+  "packageManagers": [
+    {
+      "id": "pip",
+      "name": "pip",
+      "lockfiles": [],
+      "manifests": [
+        "pyproject.toml",
+        "requirements.txt"
+      ],
+      "binary": "pip",
+      "confidence": {
+        "score": 0.8,
+        "level": "high",
+        "reason": "requirements.txt present"
+      }
+    }
+  ],
+  "manifests": [
+    {
+      "kind": "pyproject.toml",
+      "path": "pyproject.toml",
+      "parsed": {
+        "project": {
+          "name": "python-app",
+          "version": "0.1.0",
+          "requires-python": ">=3.10",
+          "dependencies": [
+            "fastapi>=0.110.0",
+            "uvicorn[standard]>=0.27.0"
+          ],
+          "scripts": {
+            "python-app": "python_app.main:main"
+          },
+          "description": "Sample Python fixture for PST tests"
+        },
+        "build-system": {
+          "requires": [
+            "hatchling"
+          ],
+          "build-backend": "hatchling.build"
+        },
+        "tool": {
+          "pytest": {
+            "ini_options": {
+              "testpaths": [
+                "tests"
+              ]
+            }
+          }
+        }
+      },
+      "evidence": [
+        "pyproject.toml"
+      ]
+    },
+    {
+      "kind": "requirements.txt",
+      "path": "requirements.txt",
+      "parsed": [
+        "fastapi==0.110.0",
+        "uvicorn[standard]==0.27.0",
+        "pytest==8.0.0"
+      ],
+      "evidence": [
+        "requirements.txt"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "pyproject.toml",
+      "kind": "manifest",
+      "note": "Python project metadata (PEP 621 / Poetry / uv)"
+    },
+    {
+      "path": "requirements.txt",
+      "kind": "manifest",
+      "note": "pip requirements file"
+    },
+    {
+      "path": ".env.example",
+      "kind": "env",
+      "note": "example environment file"
+    },
+    {
+      "path": "README.md",
+      "kind": "readme",
+      "note": "Project README"
+    }
+  ],
+  "env": [
+    {
+      "path": ".env.example",
+      "kind": "example",
+      "variables": [
+        {
+          "name": "DATABASE_URL",
+          "defaultValue": "sqlite:///./app.db",
+          "required": true,
+          "source": [
+            ".env.example"
+          ]
+        },
+        {
+          "name": "SECRET_KEY",
+          "defaultValue": "change-me",
+          "required": true,
+          "source": [
+            ".env.example"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "README.md",
+      "kind": "template",
+      "variables": [
+        {
+          "name": "DATABASE_URL",
+          "defaultValue": "sqlite:///./app.db",
+          "required": false,
+          "source": [
+            "README.md"
+          ]
+        },
+        {
+          "name": "SECRET_KEY",
+          "defaultValue": "change-me",
+          "required": false,
+          "source": [
+            "README.md"
+          ]
+        }
+      ]
+    }
+  ],
+  "entrypoints": [
+    "python_app.main:main",
+    "main.py"
+  ],
+  "installPlan": {
+    "steps": [
+      {
+        "label": "Install dependencies (pip)",
+        "command": "pip install -r requirements.txt",
+        "rationale": "requirements.txt present",
+        "confidence": {
+          "score": 0.85,
+          "level": "high",
+          "reason": "requirements.txt present"
+        }
+      }
+    ],
+    "packageManager": "pip",
+    "notes": [
+      "Consider migrating to uv or Poetry for reproducible installs."
+    ]
+  },
+  "runPlan": {
+    "steps": [
+      {
+        "label": "Run FastAPI app",
+        "command": "uvicorn main:app --reload",
+        "rationale": "FastAPI dependency detected; assumed uvicorn entrypoint main:app",
+        "requiredEnv": [
+          "DATABASE_URL",
+          "SECRET_KEY"
+        ],
+        "confidence": {
+          "score": 0.55,
+          "level": "medium",
+          "reason": "Framework inference — verify main:app is correct"
+        }
+      }
+    ],
+    "notes": []
+  },
+  "buildPlan": {
+    "steps": [],
+    "notes": [
+      "No build step required for this Python project."
+    ]
+  },
+  "testPlan": {
+    "steps": [
+      {
+        "label": "Run tests (pytest)",
+        "command": "pytest",
+        "rationale": "pytest configuration found",
+        "confidence": {
+          "score": 0.8,
+          "level": "high",
+          "reason": "pytest config"
+        }
+      }
+    ],
+    "notes": []
+  },
+  "deployPlan": {
+    "steps": [],
+    "targets": [
+      "fly",
+      "railway",
+      "render"
+    ],
+    "readiness": "not-ready",
+    "notes": []
+  },
+  "diagnostics": [],
+  "overall": {
+    "score": 0.88,
+    "level": "high",
+    "reason": "Aggregated across all detections"
+  }
+}

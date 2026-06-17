@@ -1,0 +1,174 @@
+{
+  "root": "/home/z/my-project/pst/fixtures/go-app",
+  "schemaVersion": 1,
+  "scannedAt": "2026-06-17T04:39:56.660Z",
+  "languages": [
+    {
+      "id": "go",
+      "name": "Go",
+      "evidence": [
+        "go.mod"
+      ],
+      "confidence": {
+        "score": 0.97,
+        "level": "high",
+        "reason": "Found go.mod"
+      },
+      "versionConstraint": "1.22"
+    }
+  ],
+  "frameworks": [],
+  "packageManagers": [
+    {
+      "id": "go-mod",
+      "name": "Go modules",
+      "lockfiles": [],
+      "manifests": [
+        "go.mod"
+      ],
+      "binary": "go",
+      "confidence": {
+        "score": 0.97,
+        "level": "high",
+        "reason": "Found go.mod"
+      }
+    }
+  ],
+  "manifests": [
+    {
+      "kind": "go.mod",
+      "path": "go.mod",
+      "parsed": {
+        "module": "github.com/pst-fixture/go-app",
+        "go": "1.22",
+        "require": [
+          {
+            "path": "github.com/gin-gonic/gin",
+            "version": "v1.9.1"
+          }
+        ]
+      },
+      "evidence": [
+        "go.mod"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "go.mod",
+      "kind": "manifest",
+      "note": "Go module manifest"
+    },
+    {
+      "path": ".env.example",
+      "kind": "env",
+      "note": "example environment file"
+    },
+    {
+      "path": "README.md",
+      "kind": "readme",
+      "note": "Project README"
+    }
+  ],
+  "env": [
+    {
+      "path": ".env.example",
+      "kind": "example",
+      "variables": [
+        {
+          "name": "PORT",
+          "defaultValue": "8080",
+          "required": true,
+          "source": [
+            ".env.example"
+          ]
+        }
+      ]
+    }
+  ],
+  "entrypoints": [
+    "main.go"
+  ],
+  "installPlan": {
+    "steps": [
+      {
+        "label": "Download module dependencies",
+        "command": "go mod download",
+        "rationale": "go.mod present",
+        "confidence": {
+          "score": 0.9,
+          "level": "high",
+          "reason": "go.mod"
+        }
+      }
+    ],
+    "packageManager": "go-mod",
+    "notes": []
+  },
+  "runPlan": {
+    "steps": [
+      {
+        "label": "Run app",
+        "command": "go run main.go",
+        "rationale": "Found main.go",
+        "requiredEnv": [
+          "PORT"
+        ],
+        "confidence": {
+          "score": 0.9,
+          "level": "high",
+          "reason": "Go entrypoint"
+        }
+      }
+    ],
+    "entrypoint": "main.go",
+    "notes": []
+  },
+  "buildPlan": {
+    "steps": [
+      {
+        "label": "Build binary",
+        "command": "go build -o go-app ./...",
+        "rationale": "Standard go build invocation",
+        "confidence": {
+          "score": 0.85,
+          "level": "high",
+          "reason": "go build convention"
+        }
+      }
+    ],
+    "output": "go-app",
+    "notes": []
+  },
+  "testPlan": {
+    "steps": [
+      {
+        "label": "Run tests",
+        "command": "go test ./...",
+        "rationale": "Standard go test invocation",
+        "confidence": {
+          "score": 0.9,
+          "level": "high",
+          "reason": "go test convention"
+        }
+      }
+    ],
+    "notes": []
+  },
+  "deployPlan": {
+    "steps": [],
+    "targets": [
+      "generic-host"
+    ],
+    "readiness": "not-ready",
+    "notes": [
+      "Go binaries can deploy to any Linux host. Add a Dockerfile for portable deploys."
+    ]
+  },
+  "diagnostics": [],
+  "overall": {
+    "score": 0.97,
+    "level": "high",
+    "reason": "Aggregated across all detections"
+  }
+}

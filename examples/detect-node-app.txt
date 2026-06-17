@@ -1,0 +1,54 @@
+PST — Project Intelligence Report
+Scanned: /home/z/my-project/pst/fixtures/node-app
+At:      2026-06-17T04:39:55.518Z
+Overall: high (0.96)
+
+Languages
+  • Node.js (requires >=18) — high (0.97)
+      evidence: package.json, package-lock.json
+
+Frameworks
+  • Express — high (0.75)
+      evidence: dep:express
+
+Package managers
+  • npm (binary: npm) — high (0.95)
+      lockfiles: package-lock.json
+
+Manifests
+  • package.json
+
+Environment
+  • .env.example (example)
+      PORT=3000 [required]
+      DATABASE_URL=postgres://localhost:5432/app [required]
+      JWT_SECRET [required]
+  • README.md (template)
+      PORT=3000
+      DATABASE_URL=postgres://localhost:5432/app
+      JWT_SECRET
+
+Entrypoints
+  • index.js
+
+Install plan
+  • Install dependencies — high (0.92)
+      $ npm install
+
+Run plan
+  • Run dev server — high (0.95)
+      $ npm run dev
+      needs env: PORT, DATABASE_URL, JWT_SECRET
+
+Build plan
+  • Build — high (0.95)
+      $ npm run build
+
+Test plan
+  • Run tests — high (0.95)
+      $ npm test
+
+Deploy plan
+  targets:   generic-host
+  readiness: not-ready
+

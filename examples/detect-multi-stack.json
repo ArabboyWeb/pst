@@ -1,0 +1,198 @@
+{
+  "root": "/home/z/my-project/pst/fixtures/multi-stack",
+  "schemaVersion": 1,
+  "scannedAt": "2026-06-17T04:39:57.636Z",
+  "languages": [
+    {
+      "id": "node",
+      "name": "Node.js",
+      "evidence": [
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "confidence": {
+        "score": 0.97,
+        "level": "high",
+        "reason": "Found root package.json"
+      }
+    }
+  ],
+  "frameworks": [
+    {
+      "id": "next",
+      "name": "Next.js",
+      "evidence": [
+        "dep:next",
+        "next.config.mjs"
+      ],
+      "confidence": {
+        "score": 0.95,
+        "level": "high",
+        "reason": "dep:next, next.config.mjs"
+      }
+    },
+    {
+      "id": "react",
+      "name": "React",
+      "evidence": [
+        "dep:react"
+      ],
+      "confidence": {
+        "score": 0.75,
+        "level": "high",
+        "reason": "dep:react"
+      }
+    }
+  ],
+  "packageManagers": [
+    {
+      "id": "pnpm",
+      "name": "pnpm",
+      "lockfiles": [
+        "pnpm-lock.yaml"
+      ],
+      "manifests": [
+        "package.json"
+      ],
+      "binary": "pnpm",
+      "confidence": {
+        "score": 0.95,
+        "level": "high",
+        "reason": "Found pnpm-lock.yaml"
+      }
+    }
+  ],
+  "manifests": [
+    {
+      "kind": "package.json",
+      "path": "package.json",
+      "parsed": {
+        "name": "multi-stack",
+        "version": "1.0.0",
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "test": "vitest run"
+        },
+        "dependencies": {
+          "next": "^14.2.0",
+          "react": "^18.3.0",
+          "react-dom": "^18.3.0"
+        },
+        "devDependencies": {
+          "vitest": "^1.6.0"
+        }
+      },
+      "evidence": [
+        "package.json"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "package.json",
+      "kind": "manifest",
+      "note": "Node.js manifest (root)"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "kind": "lockfile",
+      "note": "pnpm lockfile"
+    },
+    {
+      "path": "README.md",
+      "kind": "readme",
+      "note": "Project README"
+    }
+  ],
+  "env": [],
+  "entrypoints": [],
+  "installPlan": {
+    "steps": [
+      {
+        "label": "Install dependencies",
+        "command": "pnpm install",
+        "rationale": "Found pnpm lockfile (pnpm-lock.yaml).",
+        "confidence": {
+          "score": 0.92,
+          "level": "high",
+          "reason": "pnpm lockfile present"
+        }
+      }
+    ],
+    "packageManager": "pnpm",
+    "notes": []
+  },
+  "runPlan": {
+    "steps": [
+      {
+        "label": "Run dev server",
+        "command": "pnpm run dev",
+        "rationale": "package.json scripts.dev present",
+        "requiredEnv": [],
+        "confidence": {
+          "score": 0.95,
+          "level": "high",
+          "reason": "scripts.dev"
+        }
+      }
+    ],
+    "notes": []
+  },
+  "buildPlan": {
+    "steps": [
+      {
+        "label": "Build",
+        "command": "pnpm run build",
+        "rationale": "package.json scripts.build present",
+        "confidence": {
+          "score": 0.95,
+          "level": "high",
+          "reason": "scripts.build"
+        }
+      }
+    ],
+    "notes": []
+  },
+  "testPlan": {
+    "steps": [
+      {
+        "label": "Run tests",
+        "command": "pnpm test",
+        "rationale": "package.json scripts.test present",
+        "confidence": {
+          "score": 0.95,
+          "level": "high",
+          "reason": "scripts.test"
+        }
+      }
+    ],
+    "notes": []
+  },
+  "deployPlan": {
+    "steps": [
+      {
+        "label": "Deploy to Vercel",
+        "command": "vercel --prod",
+        "rationale": "Next.js detected — Vercel is the canonical host.",
+        "confidence": {
+          "score": 0.65,
+          "level": "medium",
+          "reason": "Framework convention (no vercel.json found)"
+        }
+      }
+    ],
+    "targets": [
+      "vercel"
+    ],
+    "readiness": "partial",
+    "notes": []
+  },
+  "diagnostics": [],
+  "overall": {
+    "score": 0.96,
+    "level": "high",
+    "reason": "Aggregated across all detections"
+  }
+}

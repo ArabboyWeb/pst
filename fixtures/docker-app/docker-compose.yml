@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.example
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"

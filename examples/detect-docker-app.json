@@ -1,0 +1,253 @@
+{
+  "root": "/home/z/my-project/pst/fixtures/docker-app",
+  "schemaVersion": 1,
+  "scannedAt": "2026-06-17T04:39:57.138Z",
+  "languages": [
+    {
+      "id": "node",
+      "name": "Node.js",
+      "evidence": [
+        "package.json"
+      ],
+      "confidence": {
+        "score": 0.97,
+        "level": "high",
+        "reason": "Found root package.json"
+      }
+    },
+    {
+      "id": "docker",
+      "name": "Docker",
+      "evidence": [
+        "Dockerfile",
+        "docker-compose.yml"
+      ],
+      "confidence": {
+        "score": 0.97,
+        "level": "high",
+        "reason": "Found docker-compose.yml"
+      }
+    }
+  ],
+  "frameworks": [
+    {
+      "id": "express",
+      "name": "Express",
+      "evidence": [
+        "dep:express"
+      ],
+      "confidence": {
+        "score": 0.75,
+        "level": "high",
+        "reason": "dep:express"
+      }
+    }
+  ],
+  "packageManagers": [
+    {
+      "id": "compose",
+      "name": "Docker Compose",
+      "lockfiles": [],
+      "manifests": [
+        "Dockerfile",
+        "docker-compose.yml"
+      ],
+      "binary": "docker compose",
+      "confidence": {
+        "score": 0.97,
+        "level": "high",
+        "reason": "Found docker-compose.yml"
+      }
+    },
+    {
+      "id": "npm",
+      "name": "npm",
+      "lockfiles": [],
+      "manifests": [
+        "package.json"
+      ],
+      "binary": "npm",
+      "confidence": {
+        "score": 0.55,
+        "level": "medium",
+        "reason": "No lockfile found; assuming npm"
+      }
+    }
+  ],
+  "manifests": [
+    {
+      "kind": "package.json",
+      "path": "package.json",
+      "parsed": {
+        "name": "docker-app",
+        "version": "1.0.0",
+        "type": "module",
+        "scripts": {
+          "start": "node index.js"
+        },
+        "dependencies": {
+          "express": "^4.19.2"
+        },
+        "main": "index.js"
+      },
+      "evidence": [
+        "package.json"
+      ]
+    },
+    {
+      "kind": "docker-compose.yml",
+      "path": "docker-compose.yml",
+      "parsed": {
+        "services": {
+          "web": {
+            "build": ".",
+            "ports": [
+              "3000:3000"
+            ],
+            "env_file": [
+              ".env.example"
+            ]
+          },
+          "redis": {
+            "image": "redis:7-alpine",
+            "ports": [
+              "6379:6379"
+            ]
+          }
+        }
+      },
+      "evidence": [
+        "docker-compose.yml"
+      ]
+    },
+    {
+      "kind": "Dockerfile",
+      "path": "Dockerfile",
+      "evidence": [
+        "Dockerfile"
+      ],
+      "parsed": "# syntax=docker/dockerfile:1\nFROM node:20-alpine AS base\nWORKDIR /app\n\nCOPY package.json package-lock.json ./\nRUN npm ci --omit=dev\n\nCOPY . .\nEXPOSE 3000\nCMD [\"node\", \"index.js\"]\n"
+    }
+  ],
+  "files": [
+    {
+      "path": "package.json",
+      "kind": "manifest",
+      "note": "Node.js manifest (root)"
+    },
+    {
+      "path": "docker-compose.yml",
+      "kind": "docker",
+      "note": "Docker Compose service definition"
+    },
+    {
+      "path": "Dockerfile",
+      "kind": "docker",
+      "note": "Container image build definition (root)"
+    },
+    {
+      "path": ".env.example",
+      "kind": "env",
+      "note": "example environment file"
+    },
+    {
+      "path": "README.md",
+      "kind": "readme",
+      "note": "Project README"
+    }
+  ],
+  "env": [
+    {
+      "path": ".env.example",
+      "kind": "example",
+      "variables": [
+        {
+          "name": "PORT",
+          "defaultValue": "3000",
+          "required": true,
+          "source": [
+            ".env.example"
+          ]
+        }
+      ]
+    }
+  ],
+  "entrypoints": [
+    "index.js"
+  ],
+  "installPlan": {
+    "steps": [
+      {
+        "label": "Install dependencies",
+        "command": "docker compose install",
+        "rationale": "No lockfile found; using Docker Compose install (will create a lockfile).",
+        "confidence": {
+          "score": 0.55,
+          "level": "medium",
+          "reason": "No lockfile; assuming npm install"
+        }
+      }
+    ],
+    "packageManager": "compose",
+    "notes": []
+  },
+  "runPlan": {
+    "steps": [
+      {
+        "label": "Start app",
+        "command": "docker compose start",
+        "rationale": "package.json scripts.start present",
+        "requiredEnv": [
+          "PORT"
+        ],
+        "confidence": {
+          "score": 0.95,
+          "level": "high",
+          "reason": "scripts.start"
+        }
+      }
+    ],
+    "entrypoint": "index.js",
+    "notes": []
+  },
+  "buildPlan": {
+    "steps": [],
+    "notes": [
+      "No build script detected — this project may not require a build step."
+    ]
+  },
+  "testPlan": {
+    "steps": [],
+    "notes": [
+      "No test runner detected. Consider adding a `test` script to package.json."
+    ]
+  },
+  "deployPlan": {
+    "steps": [
+      {
+        "label": "Build & push Docker image",
+        "command": "docker build -f Dockerfile -t app:latest .",
+        "rationale": "Found root Dockerfile — deploy by building the image and pushing to your registry.",
+        "confidence": {
+          "score": 0.85,
+          "level": "high",
+          "reason": "Root Dockerfile present"
+        }
+      }
+    ],
+    "targets": [
+      "generic-host",
+      "docker"
+    ],
+    "readiness": "partial",
+    "notes": [
+      "Docker image build is available as a deploy path. Add a deploy target config (fly.toml, render.yaml, etc.) for one-click deploys."
+    ]
+  },
+  "diagnostics": [],
+  "overall": {
+    "score": 0.86,
+    "level": "high",
+    "reason": "Aggregated across all detections"
+  }
+}

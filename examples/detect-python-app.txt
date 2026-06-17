@@ -1,0 +1,54 @@
+PST — Project Intelligence Report
+Scanned: /home/z/my-project/pst/fixtures/python-app
+At:      2026-06-17T04:39:56.001Z
+Overall: high (0.88)
+
+Languages
+  • Python (requires >=3.10) — high (0.95)
+      evidence: pyproject.toml, requirements.txt
+
+Frameworks
+  • FastAPI — high (0.80)
+      evidence: dep:fastapi
+
+Package managers
+  • pip (binary: pip) — high (0.80)
+
+Manifests
+  • pyproject.toml
+  • requirements.txt
+
+Environment
+  • .env.example (example)
+      DATABASE_URL=sqlite:///./app.db [required]
+      SECRET_KEY=change-me [required]
+  • README.md (template)
+      DATABASE_URL=sqlite:///./app.db
+      SECRET_KEY=change-me
+
+Entrypoints
+  • python_app.main:main
+  • main.py
+
+Install plan
+  • Install dependencies (pip) — high (0.85)
+      $ pip install -r requirements.txt
+  note: Consider migrating to uv or Poetry for reproducible installs.
+
+Run plan
+  • Run FastAPI app — medium (0.55)
+      $ uvicorn main:app --reload
+      needs env: DATABASE_URL, SECRET_KEY
+
+Build plan
+  (none)
+  note: No build step required for this Python project.
+
+Test plan
+  • Run tests (pytest) — high (0.80)
+      $ pytest
+
+Deploy plan
+  targets:   fly, railway, render
+  readiness: not-ready
+

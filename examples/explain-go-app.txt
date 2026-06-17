@@ -1,0 +1,39 @@
+PST explanation
+Project: /home/z/my-project/pst/fixtures/go-app
+Overall confidence: high (0.97)
+
+Why we detected this stack
+  • Go — high (0.97)
+      Found go.mod
+      evidence: go.mod
+  • Go modules — high
+      Found go.mod
+
+Install plan
+  • Download module dependencies
+      $ go mod download
+      why: go.mod present
+      confidence: high (0.9) — go.mod
+
+Run plan
+  • Run app
+      $ go run main.go
+      why: Found main.go
+      confidence: high (0.9) — Go entrypoint
+
+Build plan
+  • Build binary
+      $ go build -o go-app ./...
+      why: Standard go build invocation
+      confidence: high (0.85) — go build convention
+
+Test plan
+  • Run tests
+      $ go test ./...
+      why: Standard go test invocation
+      confidence: high (0.9) — go test convention
+
+Deploy plan
+  (no steps)
+  note: Go binaries can deploy to any Linux host. Add a Dockerfile for portable deploys.
+

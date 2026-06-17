@@ -1,0 +1,10 @@
+{
+  "name": "nx-repo-root",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["apps/*", "libs/*"],
+  "scripts": {
+    "build": "nx run-many --target=build --all",
+    "test": "nx run-many --target=test --all"
+  }
+}

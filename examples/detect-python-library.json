@@ -1,0 +1,136 @@
+{
+  "root": "/home/z/my-project/pst/fixtures/python-library",
+  "schemaVersion": 1,
+  "scannedAt": "2026-06-17T04:39:59.146Z",
+  "languages": [
+    {
+      "id": "python",
+      "name": "Python",
+      "evidence": [
+        "pyproject.toml"
+      ],
+      "confidence": {
+        "score": 0.95,
+        "level": "high",
+        "reason": "Found pyproject.toml"
+      },
+      "versionConstraint": ">=3.10"
+    }
+  ],
+  "frameworks": [],
+  "packageManagers": [
+    {
+      "id": "pip",
+      "name": "pip",
+      "lockfiles": [],
+      "manifests": [
+        "pyproject.toml"
+      ],
+      "binary": "pip",
+      "confidence": {
+        "score": 0.75,
+        "level": "high",
+        "reason": "pyproject.toml with [build-system] present"
+      }
+    }
+  ],
+  "manifests": [
+    {
+      "kind": "pyproject.toml",
+      "path": "pyproject.toml",
+      "parsed": {
+        "project": {
+          "name": "python-library",
+          "version": "0.1.0",
+          "requires-python": ">=3.10",
+          "dependencies": [
+            "httpx>=0.27.0"
+          ],
+          "description": "A Python library with no runnable entrypoint"
+        },
+        "build-system": {
+          "requires": [
+            "hatchling"
+          ],
+          "build-backend": "hatchling.build"
+        }
+      },
+      "evidence": [
+        "pyproject.toml"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "pyproject.toml",
+      "kind": "manifest",
+      "note": "Python project metadata (PEP 621 / Poetry / uv)"
+    },
+    {
+      "path": "README.md",
+      "kind": "readme",
+      "note": "Project README"
+    }
+  ],
+  "env": [],
+  "entrypoints": [],
+  "installPlan": {
+    "steps": [
+      {
+        "label": "Install project (pip)",
+        "command": "pip install .",
+        "rationale": "pyproject.toml with [build-system] detected; no requirements.txt",
+        "confidence": {
+          "score": 0.75,
+          "level": "high",
+          "reason": "PEP 517 / setuptools build"
+        }
+      }
+    ],
+    "packageManager": "pip",
+    "notes": [
+      "Consider migrating to uv or Poetry for reproducible installs."
+    ]
+  },
+  "runPlan": {
+    "steps": [],
+    "notes": [
+      "No run command could be inferred. Common patterns: `python main.py`, `uvicorn main:app`, `python manage.py runserver`."
+    ]
+  },
+  "buildPlan": {
+    "steps": [],
+    "notes": [
+      "No build step required for this Python project."
+    ]
+  },
+  "testPlan": {
+    "steps": [
+      {
+        "label": "Run tests (pytest)",
+        "command": "pytest",
+        "rationale": "pytest configuration found",
+        "confidence": {
+          "score": 0.8,
+          "level": "high",
+          "reason": "pytest config"
+        }
+      }
+    ],
+    "notes": []
+  },
+  "deployPlan": {
+    "steps": [],
+    "targets": [
+      "generic-host"
+    ],
+    "readiness": "not-ready",
+    "notes": []
+  },
+  "diagnostics": [],
+  "overall": {
+    "score": 0.85,
+    "level": "high",
+    "reason": "Aggregated across all detections"
+  }
+}

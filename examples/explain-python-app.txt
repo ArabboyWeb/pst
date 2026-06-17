@@ -1,0 +1,37 @@
+PST explanation
+Project: /home/z/my-project/pst/fixtures/python-app
+Overall confidence: high (0.88)
+
+Why we detected this stack
+  • Python — high (0.95)
+      Found pyproject.toml, requirements.txt
+      evidence: pyproject.toml, requirements.txt
+  • pip — high
+      requirements.txt present
+
+Install plan
+  • Install dependencies (pip)
+      $ pip install -r requirements.txt
+      why: requirements.txt present
+      confidence: high (0.85) — requirements.txt present
+  note: Consider migrating to uv or Poetry for reproducible installs.
+
+Run plan
+  • Run FastAPI app
+      $ uvicorn main:app --reload
+      why: FastAPI dependency detected; assumed uvicorn entrypoint main:app
+      confidence: medium (0.55) — Framework inference — verify main:app is correct
+
+Build plan
+  (no steps)
+  note: No build step required for this Python project.
+
+Test plan
+  • Run tests (pytest)
+      $ pytest
+      why: pytest configuration found
+      confidence: high (0.8) — pytest config
+
+Deploy plan
+  (no steps)
+

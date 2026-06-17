@@ -1,0 +1,30 @@
+PST explanation
+Project: /home/z/my-project/pst/fixtures/subdir-docker-only
+Overall confidence: low (0)
+
+Why we detected this stack
+
+Install plan
+  (no steps)
+
+Run plan
+  (no steps)
+  note: No run plan: unsupported stack.
+
+Build plan
+  (no steps)
+  note: No build plan: unsupported stack.
+
+Test plan
+  (no steps)
+  note: No test plan: unsupported stack.
+
+Deploy plan
+  (no steps)
+  note: No deploy plan: unsupported stack.
+
+Diagnostics
+  i Found 1 Dockerfile(s) in subdirectories but none at the project root.
+      fix: Subdirectory Dockerfiles are treated as test fixtures and do not trigger Docker planning. Add a root Dockerfile if this project should be built as a container.
+  ✗ PST could not identify a supported stack to plan against.
+      fix: Add a package.json, pyproject.toml/requirements.txt, go.mod, or root Dockerfile at the project root and re-run.

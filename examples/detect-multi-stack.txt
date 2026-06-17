@@ -1,0 +1,44 @@
+PST — Project Intelligence Report
+Scanned: /home/z/my-project/pst/fixtures/multi-stack
+At:      2026-06-17T04:39:57.443Z
+Overall: high (0.96)
+
+Languages
+  • Node.js  — high (0.97)
+      evidence: package.json, pnpm-lock.yaml
+
+Frameworks
+  • Next.js — high (0.95)
+      evidence: dep:next, next.config.mjs
+  • React — high (0.75)
+      evidence: dep:react
+
+Package managers
+  • pnpm (binary: pnpm) — high (0.95)
+      lockfiles: pnpm-lock.yaml
+
+Manifests
+  • package.json
+
+Install plan
+  • Install dependencies — high (0.92)
+      $ pnpm install
+
+Run plan
+  • Run dev server — high (0.95)
+      $ pnpm run dev
+
+Build plan
+  • Build — high (0.95)
+      $ pnpm run build
+
+Test plan
+  • Run tests — high (0.95)
+      $ pnpm test
+
+Deploy plan
+  targets:   vercel
+  readiness: partial
+  • Deploy to Vercel — medium (0.65)
+      $ vercel --prod
+

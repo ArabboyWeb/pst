@@ -1,0 +1,41 @@
+PST explanation
+Project: /home/z/my-project/pst/fixtures/docker-app
+Overall confidence: high (0.86)
+
+Why we detected this stack
+  • Node.js — high (0.97)
+      Found root package.json
+      evidence: package.json
+  • Docker — high (0.97)
+      Found docker-compose.yml
+      evidence: Dockerfile, docker-compose.yml
+  • Docker Compose — high
+      Found docker-compose.yml
+
+Install plan
+  • Install dependencies
+      $ docker compose install
+      why: No lockfile found; using Docker Compose install (will create a lockfile).
+      confidence: medium (0.55) — No lockfile; assuming npm install
+
+Run plan
+  • Start app
+      $ docker compose start
+      why: package.json scripts.start present
+      confidence: high (0.95) — scripts.start
+
+Build plan
+  (no steps)
+  note: No build script detected — this project may not require a build step.
+
+Test plan
+  (no steps)
+  note: No test runner detected. Consider adding a `test` script to package.json.
+
+Deploy plan
+  • Build & push Docker image
+      $ docker build -f Dockerfile -t app:latest .
+      why: Found root Dockerfile — deploy by building the image and pushing to your registry.
+      confidence: high (0.85) — Root Dockerfile present
+  note: Docker image build is available as a deploy path. Add a deploy target config (fly.toml, render.yaml, etc.) for one-click deploys.
+

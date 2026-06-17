@@ -1,0 +1,35 @@
+PST explanation
+Project: /home/z/my-project/pst/fixtures/python-library
+Overall confidence: high (0.85)
+
+Why we detected this stack
+  • Python — high (0.95)
+      Found pyproject.toml
+      evidence: pyproject.toml
+  • pip — high
+      pyproject.toml with [build-system] present
+
+Install plan
+  • Install project (pip)
+      $ pip install .
+      why: pyproject.toml with [build-system] detected; no requirements.txt
+      confidence: high (0.75) — PEP 517 / setuptools build
+  note: Consider migrating to uv or Poetry for reproducible installs.
+
+Run plan
+  (no steps)
+  note: No run command could be inferred. Common patterns: `python main.py`, `uvicorn main:app`, `python manage.py runserver`.
+
+Build plan
+  (no steps)
+  note: No build step required for this Python project.
+
+Test plan
+  • Run tests (pytest)
+      $ pytest
+      why: pytest configuration found
+      confidence: high (0.8) — pytest config
+
+Deploy plan
+  (no steps)
+

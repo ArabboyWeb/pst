@@ -1,0 +1,6 @@
+{
+  "name": "@poly/web",
+  "version": "1.0.0",
+  "scripts": { "dev": "next dev", "build": "next build" },
+  "dependencies": { "@poly/shared": "workspace:*" }
+}

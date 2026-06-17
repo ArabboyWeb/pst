@@ -1,0 +1,3 @@
+{
+  "plugins": ["./fixtures/test-plugins/mock.ts"]
+}

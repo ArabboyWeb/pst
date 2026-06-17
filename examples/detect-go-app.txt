@@ -1,0 +1,44 @@
+PST — Project Intelligence Report
+Scanned: /home/z/my-project/pst/fixtures/go-app
+At:      2026-06-17T04:39:56.481Z
+Overall: high (0.97)
+
+Languages
+  • Go (requires 1.22) — high (0.97)
+      evidence: go.mod
+
+Package managers
+  • Go modules (binary: go) — high (0.97)
+
+Manifests
+  • go.mod
+
+Environment
+  • .env.example (example)
+      PORT=8080 [required]
+
+Entrypoints
+  • main.go
+
+Install plan
+  • Download module dependencies — high (0.90)
+      $ go mod download
+
+Run plan
+  • Run app — high (0.90)
+      $ go run main.go
+      needs env: PORT
+
+Build plan
+  • Build binary — high (0.85)
+      $ go build -o go-app ./...
+
+Test plan
+  • Run tests — high (0.90)
+      $ go test ./...
+
+Deploy plan
+  targets:   generic-host
+  readiness: not-ready
+  note: Go binaries can deploy to any Linux host. Add a Dockerfile for portable deploys.
+

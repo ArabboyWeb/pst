@@ -1,0 +1,13 @@
+{
+  "name": "node-tooling-only",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A package.json with only devDependencies (e.g. Django's JS tooling)",
+  "devDependencies": {
+    "grunt": "^1.6.2",
+    "qunit": "^2.25.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  }
+}

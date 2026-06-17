@@ -1,0 +1,132 @@
+{
+  "root": "/home/z/my-project/pst/fixtures/node-tooling-only",
+  "schemaVersion": 1,
+  "scannedAt": "2026-06-17T04:39:58.643Z",
+  "languages": [
+    {
+      "id": "node",
+      "name": "Node.js",
+      "evidence": [
+        "package.json"
+      ],
+      "confidence": {
+        "score": 0.55,
+        "level": "medium",
+        "reason": "Found root package.json but it has only devDependencies and no framework (likely tooling-only)"
+      }
+    }
+  ],
+  "frameworks": [],
+  "packageManagers": [
+    {
+      "id": "npm",
+      "name": "npm",
+      "lockfiles": [],
+      "manifests": [
+        "package.json"
+      ],
+      "binary": "npm",
+      "confidence": {
+        "score": 0.55,
+        "level": "medium",
+        "reason": "No lockfile found; assuming npm"
+      }
+    }
+  ],
+  "manifests": [
+    {
+      "kind": "package.json",
+      "path": "package.json",
+      "parsed": {
+        "name": "node-tooling-only",
+        "version": "1.0.0",
+        "description": "A package.json with only devDependencies (e.g. Django's JS tooling)",
+        "private": true,
+        "scripts": {
+          "test": "grunt test"
+        },
+        "devDependencies": {
+          "grunt": "^1.6.2",
+          "qunit": "^2.25.0"
+        }
+      },
+      "evidence": [
+        "package.json"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "package.json",
+      "kind": "manifest",
+      "note": "Node.js manifest (root)"
+    }
+  ],
+  "env": [],
+  "entrypoints": [],
+  "installPlan": {
+    "steps": [
+      {
+        "label": "Install dependencies",
+        "command": "npm install",
+        "rationale": "No lockfile found; using npm install (will create a lockfile).",
+        "confidence": {
+          "score": 0.55,
+          "level": "medium",
+          "reason": "No lockfile; assuming npm install"
+        }
+      }
+    ],
+    "packageManager": "npm",
+    "notes": [
+      "No lockfile found — `npm install` will create one. Commit it for reproducible installs."
+    ]
+  },
+  "runPlan": {
+    "steps": [],
+    "notes": []
+  },
+  "buildPlan": {
+    "steps": [],
+    "notes": [
+      "No build script detected — this project may not require a build step."
+    ]
+  },
+  "testPlan": {
+    "steps": [
+      {
+        "label": "Run tests",
+        "command": "npm test",
+        "rationale": "package.json scripts.test present",
+        "confidence": {
+          "score": 0.95,
+          "level": "high",
+          "reason": "scripts.test"
+        }
+      }
+    ],
+    "notes": []
+  },
+  "deployPlan": {
+    "steps": [],
+    "targets": [
+      "generic-host"
+    ],
+    "readiness": "not-ready",
+    "notes": []
+  },
+  "diagnostics": [
+    {
+      "severity": "info",
+      "code": "node.tooling-only",
+      "message": "package.json at root has no \"dependencies\" field and no framework in devDependencies — treating Node as a tooling stack, not the primary language.",
+      "nextStep": "If Node is actually the primary language, add runtime dependencies or a framework to package.json.",
+      "path": "package.json"
+    }
+  ],
+  "overall": {
+    "score": 0.55,
+    "level": "medium",
+    "reason": "Aggregated across all detections"
+  }
+}

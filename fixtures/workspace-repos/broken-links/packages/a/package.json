@@ -1,0 +1,8 @@
+{
+  "name": "@broken/a",
+  "version": "1.0.0",
+  "dependencies": {
+    "@broken/nonexistent": "workspace:*",
+    "@broken/b": "workspace:*"
+  }
+}

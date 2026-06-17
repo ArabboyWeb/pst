@@ -1,0 +1,38 @@
+PST explanation
+Project: /home/z/my-project/pst/fixtures/node-app
+Overall confidence: high (0.96)
+
+Why we detected this stack
+  • Node.js — high (0.97)
+      Found root package.json
+      evidence: package.json, package-lock.json
+  • npm — high
+      Found package-lock.json
+
+Install plan
+  • Install dependencies
+      $ npm install
+      why: Found npm lockfile (package-lock.json).
+      confidence: high (0.92) — npm lockfile present
+
+Run plan
+  • Run dev server
+      $ npm run dev
+      why: package.json scripts.dev present
+      confidence: high (0.95) — scripts.dev
+
+Build plan
+  • Build
+      $ npm run build
+      why: package.json scripts.build present
+      confidence: high (0.95) — scripts.build
+
+Test plan
+  • Run tests
+      $ npm test
+      why: package.json scripts.test present
+      confidence: high (0.95) — scripts.test
+
+Deploy plan
+  (no steps)
+

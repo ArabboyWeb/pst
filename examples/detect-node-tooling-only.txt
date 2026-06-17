@@ -1,0 +1,40 @@
+PST — Project Intelligence Report
+Scanned: /home/z/my-project/pst/fixtures/node-tooling-only
+At:      2026-06-17T04:39:58.434Z
+Overall: medium (0.55)
+
+Languages
+  • Node.js  — medium (0.55)
+      evidence: package.json
+
+Package managers
+  • npm (binary: npm) — medium (0.55)
+
+Manifests
+  • package.json
+
+Install plan
+  • Install dependencies — medium (0.55)
+      $ npm install
+  note: No lockfile found — `npm install` will create one. Commit it for reproducible installs.
+
+Run plan
+  (none)
+
+Build plan
+  (none)
+  note: No build script detected — this project may not require a build step.
+
+Test plan
+  • Run tests — high (0.95)
+      $ npm test
+
+Deploy plan
+  targets:   generic-host
+  readiness: not-ready
+
+Diagnostics
+  i [node.tooling-only] package.json at root has no "dependencies" field and no framework in devDependencies — treating Node as a tooling stack, not the primary language.
+      file: package.json
+      fix:  If Node is actually the primary language, add runtime dependencies or a framework to package.json.
+

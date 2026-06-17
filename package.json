@@ -1,0 +1,83 @@
+{
+  "name": "pst-cli",
+  "version": "0.1.0",
+  "description": "PST — cross-language project intelligence and deployment assistant. Understand a repo fast. Set it up faster.",
+  "type": "module",
+  "license": "MIT",
+  "author": "PST Contributors",
+  "homepage": "https://github.com/ArabboyWeb/pst",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArabboyWeb/pst.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ArabboyWeb/pst/issues"
+  },
+  "keywords": [
+    "cli",
+    "project-setup",
+    "detection",
+    "developer-tools",
+    "onboarding",
+    "deploy",
+    "node",
+    "python",
+    "go",
+    "docker"
+  ],
+  "bin": {
+    "pst": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./plugin-api": {
+      "types": "./dist/plugin-api.d.ts",
+      "import": "./dist/plugin-api.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "docs"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "start": "node dist/cli.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm test",
+    "pst": "node dist/cli.js"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "enquirer": "^2.4.1",
+    "fast-glob": "^3.3.2",
+    "fs-extra": "^11.2.0",
+    "json5": "^2.2.3",
+    "ora": "^7.0.1",
+    "toml": "^3.0.0",
+    "yaml": "^2.4.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.14.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "tsup": "^8.1.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}

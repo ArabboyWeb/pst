@@ -1,0 +1,55 @@
+PST — Project Intelligence Report
+Scanned: /home/z/my-project/pst/fixtures/docker-app
+At:      2026-06-17T04:39:56.941Z
+Overall: high (0.86)
+
+Languages
+  • Node.js  — high (0.97)
+      evidence: package.json
+  • Docker  — high (0.97)
+      evidence: Dockerfile, docker-compose.yml
+
+Frameworks
+  • Express — high (0.75)
+      evidence: dep:express
+
+Package managers
+  • Docker Compose (binary: docker compose) — high (0.97)
+  • npm (binary: npm) — medium (0.55)
+
+Manifests
+  • package.json
+  • docker-compose.yml
+  • Dockerfile
+
+Environment
+  • .env.example (example)
+      PORT=3000 [required]
+
+Entrypoints
+  • index.js
+
+Install plan
+  • Install dependencies — medium (0.55)
+      $ docker compose install
+
+Run plan
+  • Start app — high (0.95)
+      $ docker compose start
+      needs env: PORT
+
+Build plan
+  (none)
+  note: No build script detected — this project may not require a build step.
+
+Test plan
+  (none)
+  note: No test runner detected. Consider adding a `test` script to package.json.
+
+Deploy plan
+  targets:   generic-host, docker
+  readiness: partial
+  • Build & push Docker image — high (0.85)
+      $ docker build -f Dockerfile -t app:latest .
+  note: Docker image build is available as a deploy path. Add a deploy target config (fly.toml, render.yaml, etc.) for one-click deploys.
+

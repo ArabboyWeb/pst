@@ -1,0 +1,37 @@
+PST explanation
+Project: /home/z/my-project/pst/fixtures/ambiguous-multi
+Overall confidence: high (0.86)
+
+Why we detected this stack
+  • Node.js — high (0.97)
+      Found root package.json
+      evidence: package.json
+  • Go — high (0.97)
+      Found go.mod
+      evidence: go.mod
+  • Python — high (0.95)
+      Found pyproject.toml
+      evidence: pyproject.toml
+  • Go modules — high
+      Found go.mod
+
+Install plan
+  • Install dependencies
+      $ go install
+      why: No lockfile found; using Go modules install (will create a lockfile).
+      confidence: medium (0.55) — No lockfile; assuming npm install
+
+Run plan
+  (no steps)
+
+Build plan
+  (no steps)
+  note: No build script detected — this project may not require a build step.
+
+Test plan
+  (no steps)
+  note: No test runner detected. Consider adding a `test` script to package.json.
+
+Deploy plan
+  (no steps)
+

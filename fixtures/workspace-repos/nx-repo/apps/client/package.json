@@ -1,0 +1,13 @@
+{
+  "name": "@nx/client",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@nx/shared": "workspace:*"
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "root": "/home/z/my-project/pst/fixtures/node-app",
+  "schemaVersion": 1,
+  "scannedAt": "2026-06-17T04:39:55.719Z",
+  "languages": [
+    {
+      "id": "node",
+      "name": "Node.js",
+      "evidence": [
+        "package.json",
+        "package-lock.json"
+      ],
+      "confidence": {
+        "score": 0.97,
+        "level": "high",
+        "reason": "Found root package.json"
+      },
+      "versionConstraint": ">=18"
+    }
+  ],
+  "frameworks": [
+    {
+      "id": "express",
+      "name": "Express",
+      "evidence": [
+        "dep:express"
+      ],
+      "confidence": {
+        "score": 0.75,
+        "level": "high",
+        "reason": "dep:express"
+      }
+    }
+  ],
+  "packageManagers": [
+    {
+      "id": "npm",
+      "name": "npm",
+      "lockfiles": [
+        "package-lock.json"
+      ],
+      "manifests": [
+        "package.json"
+      ],
+      "binary": "npm",
+      "confidence": {
+        "score": 0.95,
+        "level": "high",
+        "reason": "Found package-lock.json"
+      }
+    }
+  ],
+  "manifests": [
+    {
+      "kind": "package.json",
+      "path": "package.json",
+      "parsed": {
+        "name": "node-app",
+        "version": "1.0.0",
+        "description": "Sample Node.js fixture for PST tests",
+        "type": "module",
+        "engines": {
+          "node": ">=18"
+        },
+        "scripts": {
+          "dev": "node index.js",
+          "start": "node index.js",
+          "build": "tsc",
+          "test": "vitest run"
+        },
+        "dependencies": {
+          "express": "^4.19.2"
+        },
+        "devDependencies": {
+          "vitest": "^1.6.0",
+          "typescript": "^5.4.5"
+        },
+        "main": "index.js"
+      },
+      "evidence": [
+        "package.json"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "package.json",
+      "kind": "manifest",
+      "note": "Node.js manifest (root)"
+    },
+    {
+      "path": "package-lock.json",
+      "kind": "lockfile",
+      "note": "npm lockfile"
+    },
+    {
+      "path": ".env.example",
+      "kind": "env",
+      "note": "example environment file"
+    },
+    {
+      "path": "README.md",
+      "kind": "readme",
+      "note": "Project README"
+    }
+  ],
+  "env": [
+    {
+      "path": ".env.example",
+      "kind": "example",
+      "variables": [
+        {
+          "name": "PORT",
+          "defaultValue": "3000",
+          "required": true,
+          "source": [
+            ".env.example"
+          ]
+        },
+        {
+          "name": "DATABASE_URL",
+          "defaultValue": "postgres://localhost:5432/app",
+          "required": true,
+          "source": [
+            ".env.example"
+          ]
+        },
+        {
+          "name": "JWT_SECRET",
+          "required": true,
+          "source": [
+            ".env.example"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "README.md",
+      "kind": "template",
+      "variables": [
+        {
+          "name": "PORT",
+          "defaultValue": "3000",
+          "required": false,
+          "source": [
+            "README.md"
+          ]
+        },
+        {
+          "name": "DATABASE_URL",
+          "defaultValue": "postgres://localhost:5432/app",
+          "required": false,
+          "source": [
+            "README.md"
+          ]
+        },
+        {
+          "name": "JWT_SECRET",
+          "required": false,
+          "source": [
+            "README.md"
+          ]
+        }
+      ]
+    }
+  ],
+  "entrypoints": [
+    "index.js"
+  ],
+  "installPlan": {
+    "steps": [
+      {
+        "label": "Install dependencies",
+        "command": "npm install",
+        "rationale": "Found npm lockfile (package-lock.json).",
+        "confidence": {
+          "score": 0.92,
+          "level": "high",
+          "reason": "npm lockfile present"
+        }
+      }
+    ],
+    "packageManager": "npm",
+    "notes": []
+  },
+  "runPlan": {
+    "steps": [
+      {
+        "label": "Run dev server",
+        "command": "npm run dev",
+        "rationale": "package.json scripts.dev present",
+        "requiredEnv": [
+          "PORT",
+          "DATABASE_URL",
+          "JWT_SECRET"
+        ],
+        "confidence": {
+          "score": 0.95,
+          "level": "high",
+          "reason": "scripts.dev"
+        }
+      }
+    ],
+    "entrypoint": "index.js",
+    "notes": []
+  },
+  "buildPlan": {
+    "steps": [
+      {
+        "label": "Build",
+        "command": "npm run build",
+        "rationale": "package.json scripts.build present",
+        "confidence": {
+          "score": 0.95,
+          "level": "high",
+          "reason": "scripts.build"
+        }
+      }
+    ],
+    "notes": []
+  },
+  "testPlan": {
+    "steps": [
+      {
+        "label": "Run tests",
+        "command": "npm test",
+        "rationale": "package.json scripts.test present",
+        "confidence": {
+          "score": 0.95,
+          "level": "high",
+          "reason": "scripts.test"
+        }
+      }
+    ],
+    "notes": []
+  },
+  "deployPlan": {
+    "steps": [],
+    "targets": [
+      "generic-host"
+    ],
+    "readiness": "not-ready",
+    "notes": []
+  },
+  "diagnostics": [],
+  "overall": {
+    "score": 0.96,
+    "level": "high",
+    "reason": "Aggregated across all detections"
+  }
+}
