@@ -1,4 +1,4 @@
-import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from '../../src/plugin-api/index.js';
+import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from '../../dist/plugin-api.js';
 
 export default defineDetectorPlugin({
   manifest: {

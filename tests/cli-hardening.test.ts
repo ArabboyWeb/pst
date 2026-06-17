@@ -90,7 +90,7 @@ describe('CLI safety and consistency', () => {
         // ignore — we just want to see the plan in stdout
       }
     });
-    expect(stdout).toContain('Deploy plan');
+    expect(stdout).toContain('Deploy Plan');
   });
 
   it('install with no plan exits with code 2 and helpful message', async () => {

@@ -51,23 +51,17 @@ PST requires Node.js 18 or newer.
 ## Quick start
 
 ```sh
-# 1. What is this repo?
-pst detect .
+# One command to rule them all
+pst go . --dry-run    # preview what will happen
+pst go .              # do it (asks for confirmation)
 
-# 2. Show me the full plan (no execution)
-pst plan .
-
-# 3. Install (asks before running anything)
-pst install .
-
-# 4. Run it
-pst run .
-
-# 5. Check the local runtime can satisfy the plan
-pst doctor .
-
-# 6. Why did you pick that command?
-pst explain . --only install
+# Or step by step:
+pst detect .          # 1. What is this repo?
+pst plan .            # 2. Show me the full plan (no execution)
+pst install .         # 3. Install (asks before running anything)
+pst run .             # 4. Run it
+pst doctor .          # 5. Check the local runtime can satisfy the plan
+pst explain . --only install  # 6. Why did you pick that command?
 ```
 
 ## Supported stacks
@@ -84,6 +78,17 @@ Frameworks recognized:
 - **Node:** Next.js, Remix, Nuxt, SvelteKit, React, Vue, NestJS, Fastify, Express
 - **Python:** FastAPI, Django, Flask (detected from dependencies, project name, or canonical files like `manage.py`)
 
+## Quickest start
+
+```sh
+git clone <any-repo>
+cd <any-repo>
+pst go .
+```
+
+That's it. PST detects the stack, checks your runtimes, shows the full plan,
+asks for confirmation, then installs, builds, and runs the project in one shot.
+
 ## Commands
 
 | Command            | Purpose                                                          |
@@ -91,6 +96,8 @@ Frameworks recognized:
 | `pst detect [path]`   | Detect stack, manifests, env files. Print a summary.            |
 | `pst inspect [path]`  | Alias of `detect`.                                               |
 | `pst plan [path]`     | Print the full install/run/build/test/deploy plan.              |
+| `pst go [path]`       | One-shot: detect → doctor → install → build → run.             |
+| `pst deploy-all [path]`| One-shot for CI/CD: detect → doctor → install → build → deploy (dry-run default). |
 | `pst install [path]`  | Execute the install plan (asks first unless `--force`).         |
 | `pst run [path]`      | Execute the run plan.                                            |
 | `pst build [path]`    | Execute the build plan.                                          |
@@ -107,11 +114,13 @@ Frameworks recognized:
 
 | Flag                    | Applies to                              | Effect                                                  |
 | ----------------------- | --------------------------------------- | ------------------------------------------------------- |
-| `-f, --format <fmt>`    | `detect`, `inspect`, `plan`, `deploy`   | Output format: `text` (default), `json`, `markdown`     |
-| `-n, --dry-run`         | `install`, `run`, `build`, `test`, `deploy` | Print commands without executing                     |
-| `-y, --force`           | `install`, `run`, `build`, `test`, `deploy` | Skip confirmation prompts (deploy requires this to execute) |
+| `-f, --format <fmt>`    | `detect`, `inspect`, `plan`, `deploy`, `go`, `deploy-all` | Output format: `text` (default), `json`, `markdown`     |
+| `-n, --dry-run`         | `install`, `run`, `build`, `test`, `deploy`, `go`, `deploy-all` | Print commands without executing                     |
+| `-y, --force`           | `install`, `run`, `build`, `test`, `deploy`, `go`, `deploy-all` | Skip confirmation prompts (deploy requires this to execute) |
 | `--offline`             | all commands with `[path]`              | Skip runtime binary presence checks (fully hermetic)    |
 | `--only <kind>`         | `plan`, `explain`                       | Filter to `install,run,build,test,deploy` (comma-separated) |
+| `--skip-build`          | `go`                                    | Skip the build step even if a build plan exists         |
+| `--env <environment>`   | `deploy-all`                            | Deployment target hint: staging, production, preview    |
 | `--debug`               | all commands                            | Enable debug logging (verbose, includes parser internals) |
 | `--silent`              | all commands                            | Suppress all logging except errors                      |
 

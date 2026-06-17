@@ -1,7 +1,7 @@
 /**
  * Timeout plugin — detect() hangs forever.
  */
-import { defineDetectorPlugin, PLUGIN_API_VERSION } from '../../src/plugin-api/index.js';
+import { defineDetectorPlugin, PLUGIN_API_VERSION } from '../../dist/plugin-api.js';
 
 export default defineDetectorPlugin({
   manifest: {

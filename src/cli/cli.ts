@@ -1,13 +1,14 @@
 import path from 'node:path';
 import { Command } from 'commander';
 import chalk from 'chalk';
+import Enquirer from 'enquirer';
 import { scanProject } from '../core/index.js';
 import { renderReport } from '../reporter/index.js';
 import { executeSequence } from '../executor/index.js';
 import { logger } from '../utils/logger.js';
 import { which, versionOf } from '../utils/runtime.js';
 import { PluginManager } from '../plugins/manager.js';
-import type { ProjectScanResult } from '../types/index.js';
+import type { ProjectScanResult, PlannedCommand } from '../types/index.js';
 import { VERSION } from './version.js';
 
 /**
@@ -355,6 +356,323 @@ export function buildProgram(): Command {
   program.addCommand(doctor);
   program.addCommand(explain);
 
+  // ---- pst go ---------------------------------------------------------
+  const go = withExecOpts(withStandardOpts(new Command('go')));
+  go
+    .description(
+      'One-shot setup: detect, check runtimes, install, build, run.\n' +
+      'Shows all planned commands first. Stops on first failure.',
+    )
+    .option('--skip-build', 'Skip build step even if a build plan exists')
+    .option('-f, --format <fmt>', 'Output format: text, json, markdown', 'text')
+    .action(async (target: string, opts: {
+      dryRun?: boolean;
+      force?: boolean;
+      skipBuild?: boolean;
+      format: string;
+      offline?: boolean;
+    }) => {
+      // Step 1 — Detect
+      logger.info(chalk.bold.cyan('Step 1/4 — Detecting project...'));
+      const scan = await scanProject({ root: target, offline: opts.offline });
+
+      if (scan.languages.length === 0 && scan.packageManagers.length === 0) {
+        logger.error('No recognizable stack detected. Aborting.');
+        logger.error('Try running `pst detect .` to inspect, or `pst explain .` for details.');
+        process.exitCode = 1;
+        return;
+      }
+
+      // Step 2 — Doctor (runtime checks already in scan.diagnostics)
+      logger.info(chalk.bold.cyan('Step 2/4 — Checking local runtimes...'));
+      const blockers = scan.diagnostics.filter((d) =>
+        d.severity === 'error' ||
+        (d.severity === 'warn' && d.code.startsWith('runtime.'))
+      );
+      // Only error-level diagnostics block execution; runtime warnings are
+      // actionable but may not be showstoppers (e.g. missing docker).
+      const hasBlockers = scan.diagnostics.some((d) => d.severity === 'error');
+
+      if (blockers.length > 0) {
+        for (const b of blockers) {
+          const icon = b.severity === 'error' ? chalk.red('✗') : chalk.yellow('!');
+          logger.info(`  ${icon} ${b.message}`);
+          if (b.nextStep) logger.info(chalk.gray(`      ${b.nextStep}`));
+        }
+      }
+      if (hasBlockers) {
+        logger.error('');
+        logger.error('Fatal issues found. Fix them and re-run `pst go`.');
+        process.exitCode = 1;
+        return;
+      }
+
+      // Step 3 — Gather steps
+      logger.info(chalk.bold.cyan('Step 3/4 — Building execution plan...'));
+      const planSteps: PlannedCommand[] = [];
+      if (scan.installPlan.steps.length > 0) {
+        planSteps.push(...scan.installPlan.steps);
+      }
+      if (!opts.skipBuild && scan.buildPlan.steps.length > 0) {
+        planSteps.push(...scan.buildPlan.steps);
+      }
+      if (scan.runPlan.steps.length > 0) {
+        planSteps.push(...scan.runPlan.steps);
+      }
+
+      if (planSteps.length === 0) {
+        logger.warn('No executable steps to run.');
+        logger.warn('Run `pst plan .` to see what was detected.');
+        return;
+      }
+
+      // Step 4 — Show plan summary + confirm + execute
+      logger.info(chalk.bold.cyan('Step 4/4 — Execution plan:'));
+      logger.info('');
+      for (let i = 0; i < planSteps.length; i++) {
+        const s = planSteps[i];
+        const icon = s.confidence.level === 'high' ? chalk.green('✓') :
+          s.confidence.level === 'medium' ? chalk.yellow('~') : chalk.red('?');
+        logger.info(`  ${chalk.bold(`${i + 1}.`)} ${icon} ${s.label}`);
+        logger.info(chalk.gray(`     $ ${s.command}`));
+      }
+      logger.info('');
+
+      if (opts.format === 'json') {
+        const jsonOut = {
+          root: scan.root,
+          scannedAt: scan.scannedAt,
+          overall: scan.overall,
+          steps: planSteps.map((s) => ({
+            label: s.label,
+            command: s.command,
+            confidence: { level: s.confidence.level, score: s.confidence.score },
+            rationale: s.confidence.reason,
+          })),
+        };
+        process.stdout.write(JSON.stringify(jsonOut, null, 2) + '\n');
+      }
+
+      if (opts.dryRun) {
+        logger.info(chalk.gray('Dry run complete. No commands executed.'));
+        return;
+      }
+
+      // Confirm all steps at once
+      if (!opts.force) {
+        const confirmed = await confirmSingle('Run all steps shown above?');
+        if (!confirmed) {
+          logger.warn('Aborted.');
+          return;
+        }
+      }
+
+      const { anyFailed } = await executeSequence(planSteps, {
+        cwd: scan.root,
+        dryRun: false,
+        force: true, // confirmation already obtained
+      });
+      if (anyFailed) {
+        logger.error('');
+        logger.error(chalk.red('Some steps failed. Review the output above.'));
+        process.exitCode = 1;
+        return;
+      }
+      logger.info('');
+      logger.info(chalk.green('All steps completed successfully.'));
+    });
+
+  // ---- pst deploy-all --------------------------------------------------
+  const deployAll = withStandardOpts(new Command('deploy-all'));
+  deployAll
+    .description(
+      'One-shot for CI/CD: detect, check runtimes, install, build, deploy (dry-run by default).\n' +
+      'The deploy step is always printed. It only executes with --force.',
+    )
+    .option('-n, --dry-run', 'Print commands without executing (default for deploy step)')
+    .option('-y, --force', 'Execute all steps including deploy')
+    .option('-f, --format <fmt>', 'Output format: text, json, markdown', 'text')
+    .option('--env <environment>', 'Deployment target hint: staging, production, preview')
+    .action(async (target: string, opts: {
+      dryRun?: boolean;
+      force?: boolean;
+      format: string;
+      offline?: boolean;
+      env?: string;
+    }) => {
+      // Step 1 — Detect
+      logger.info(chalk.bold.cyan('Step 1/4 — Detecting project...'));
+      const scan = await scanProject({ root: target, offline: opts.offline });
+
+      if (scan.languages.length === 0 && scan.packageManagers.length === 0) {
+        logger.error('No recognizable stack detected. Aborting.');
+        process.exitCode = 1;
+        return;
+      }
+
+      // Step 2 — Doctor
+      logger.info(chalk.bold.cyan('Step 2/4 — Checking local runtimes...'));
+      const hasBlockers = scan.diagnostics.some((d) => d.severity === 'error');
+      if (hasBlockers) {
+        for (const d of scan.diagnostics.filter((d) => d.severity === 'error')) {
+          logger.info(`  ${chalk.red('✗')} ${d.message}`);
+          if (d.nextStep) logger.info(chalk.gray(`      ${d.nextStep}`));
+        }
+        logger.error('Fatal issues found. Fix them and re-run.');
+        process.exitCode = 1;
+        return;
+      }
+
+      // Step 3 — Gather install + build steps
+      logger.info(chalk.bold.cyan('Step 3/4 — Building execution plan...'));
+      const execSteps: PlannedCommand[] = [];
+      if (scan.installPlan.steps.length > 0) {
+        execSteps.push(...scan.installPlan.steps);
+      }
+      if (scan.buildPlan.steps.length > 0) {
+        execSteps.push(...scan.buildPlan.steps);
+      }
+
+      // Step 4 — Show plan + execute
+      logger.info(chalk.bold.cyan('Step 4/4 — Execution plan:'));
+      logger.info('');
+
+      if (execSteps.length > 0) {
+        logger.info(chalk.bold('Install & Build:'));
+        for (let i = 0; i < execSteps.length; i++) {
+          const s = execSteps[i];
+          const icon = s.confidence.level === 'high' ? chalk.green('✓') : chalk.yellow('~');
+          logger.info(`  ${chalk.bold(`${i + 1}.`)} ${icon} ${s.label}`);
+          logger.info(chalk.gray(`     $ ${s.command}`));
+        }
+      }
+
+      logger.info('');
+      logger.info(chalk.bold('Deploy plan (dry-run by default):'));
+      if (scan.deployPlan.steps.length > 0) {
+        for (let i = 0; i < scan.deployPlan.steps.length; i++) {
+          const s = scan.deployPlan.steps[i];
+          logger.info(`  ${chalk.bold(`${i + 1}.`)} ${s.label}`);
+          logger.info(chalk.gray(`     $ ${s.command}`));
+        }
+        const targetLabel = opts.env
+          ? `${opts.env} (via ${scan.deployPlan.targets.join(', ')})`
+          : scan.deployPlan.targets.join(', ');
+        logger.info(chalk.gray(`  targets: ${targetLabel}`));
+        logger.info(chalk.gray(`  readiness: ${scan.deployPlan.readiness}`));
+      } else {
+        logger.info(chalk.gray('  (no deploy plan inferred)'));
+      }
+
+      if (scan.deployPlan.notes.length > 0) {
+        for (const n of scan.deployPlan.notes) {
+          logger.info(chalk.gray(`  note: ${n}`));
+        }
+      }
+
+      // Check for missing env vars
+      const requiredEnv = new Set<string>();
+      for (const e of scan.env) {
+        if (e.kind === 'example') {
+          for (const v of e.variables) {
+            if (v.required) requiredEnv.add(v.name);
+          }
+        }
+      }
+      if (requiredEnv.size > 0) {
+        logger.info('');
+        logger.info(chalk.yellow.bold('Missing environment variables:'));
+        for (const v of requiredEnv) {
+          logger.info(`  ${chalk.yellow('!')} ${v}`);
+        }
+        logger.info(chalk.gray('  Set these before deploying, or add a .env file.'));
+      }
+
+      logger.info('');
+
+      if (opts.format === 'json') {
+        const jsonOut = {
+          root: scan.root,
+          scannedAt: scan.scannedAt,
+          environment: opts.env ?? 'unspecified',
+          installAndBuildSteps: execSteps.map((s) => ({
+            label: s.label,
+            command: s.command,
+            confidence: { level: s.confidence.level, score: s.confidence.score },
+          })),
+          deployPlan: {
+            steps: scan.deployPlan.steps.map((s) => ({
+              label: s.label,
+              command: s.command,
+            })),
+            targets: scan.deployPlan.targets,
+            readiness: scan.deployPlan.readiness,
+          },
+          requiredEnv: Array.from(requiredEnv),
+          overall: scan.overall,
+        };
+        process.stdout.write(JSON.stringify(jsonOut, null, 2) + '\n');
+      }
+
+      if (opts.dryRun) {
+        logger.info(chalk.gray('Dry run complete. No commands executed.'));
+        return;
+      }
+
+      // Execute install + build
+      if (execSteps.length > 0) {
+        if (!opts.force) {
+          const confirmed = await confirmSingle('Run install/build steps?');
+          if (!confirmed) {
+            logger.warn('Aborted.');
+            return;
+          }
+        }
+        const { anyFailed } = await executeSequence(execSteps, {
+          cwd: scan.root,
+          dryRun: false,
+          force: true,
+        });
+        if (anyFailed) {
+          logger.error(chalk.red('Install/build failed. Fix errors and re-run.'));
+          process.exitCode = 1;
+          return;
+        }
+        logger.info(chalk.green('Install and build completed.'));
+      }
+
+      // Deploy — always dry-run unless --force
+      if (scan.deployPlan.steps.length === 0) {
+        logger.info('');
+        logger.info(chalk.yellow('No deploy steps to run.'));
+        return;
+      }
+
+      if (!opts.force) {
+        logger.info('');
+        logger.info(chalk.gray('Deploy step skipped (dry-run by default).'));
+        logger.info(chalk.gray('Pass --force to execute the deploy plan.'));
+        return;
+      }
+
+      logger.info('');
+      logger.info(chalk.bold.cyan('Executing deploy plan...'));
+      const { anyFailed: deployFailed } = await executeSequence(scan.deployPlan.steps, {
+        cwd: scan.root,
+        dryRun: false,
+        force: true,
+      });
+      if (deployFailed) {
+        logger.error(chalk.red('Deploy step failed. Review the output above.'));
+        process.exitCode = 1;
+        return;
+      }
+      logger.info(chalk.green('Deploy completed.'));
+    });
+
+  program.addCommand(go);
+  program.addCommand(deployAll);
+
   // ---- pst plugins ---------------------------------------------------
   const pluginsCmd = new Command('plugins');
   pluginsCmd
@@ -583,4 +901,18 @@ function filterPlans(scan: ProjectScanResult, only?: string): ProjectScanResult 
   if (!kinds.has('test')) out.testPlan = { ...scan.testPlan, steps: [] };
   if (!kinds.has('deploy')) out.deployPlan = { ...scan.deployPlan, steps: [] };
   return out;
+}
+
+async function confirmSingle(message: string): Promise<boolean> {
+  try {
+    const answer = await Enquirer.prompt<{ go: boolean }>({
+      type: 'confirm',
+      name: 'go',
+      message,
+      initial: false,
+    });
+    return answer.go;
+  } catch {
+    return false;
+  }
 }

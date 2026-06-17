@@ -6,18 +6,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] — Workspace intelligence (Phase 3)
 
-### Added — Monorepo / workspace support
+### Added
 
-- **Workspace detector** (`src/workspace/detector.ts`): detects pnpm
-  workspaces, yarn workspaces, Turborepo, Nx, and Lerna by looking for
-  canonical config files (`pnpm-workspace.yaml`, `turbo.json`, `nx.json`,
-  `lerna.json`, `package.json` workspaces field).
-- **Workspace graph builder** (`src/workspace/graph-builder.ts`): discovers
-  all workspace packages via glob patterns, builds nodes (with language,
-  framework, type classification) and edges (dependency relationships),
-  computes topological build order via Kahn's algorithm, and detects
-  circular dependencies, orphans, missing references, and duplicate names.
-- **Topology report generator** (`src/workspace/topology.ts`): produces a
+- **`pst go` command** — one-shot setup: detect → doctor → install → build → run. Stops on first failure. Supports `--skip-build`, `--dry-run`, `--force`.
+- **`pst deploy-all` command** — CI/CD one-shot: detect → doctor → install → build → deploy (dry-run by default). Supports `--env staging|production|preview`.
+- **`pretest` npm script** — auto-builds before running tests.
+- **`--debug` and `--silent` flags** on `pst go`.
+- **10 new tests** for `pst go` and `pst deploy-all` commands.
+
+### Changed
+
+- **Package publishing hygiene** — `files` field updated (added `plugins/`, removed `docs/`). Added `.npmignore` as safety net.
+- **Fixture plugins** now import from `dist/plugin-api.js` instead of source, enabling reliable test execution.
+- **Plugin loader** now correctly handles Windows absolute paths via `path.isAbsolute()`.
+- **Engines field** simplified to `"node": ">=18"`.
+- **Dependency upgrades** — vitest bumped to v3, fixing 4 of 5 npm audit vulnerabilities (1 low remaining, zero critical/high).
+- **CONTRIBUTING.md** — added first-time setup gotcha for `package-lock.json` conflicts.
   complete `WorkspaceScanResult` with summary, nodes, edges, build order,
   diagnostics, and workspace-level install/build/test/run plans.
 - **`pst topology [path]`**: new command that prints the full workspace

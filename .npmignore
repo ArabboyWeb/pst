@@ -1,0 +1,15 @@
+src/
+tests/
+fixtures/
+examples/
+scripts/
+docs/
+.github/
+*.config.ts
+*.config.js
+tsconfig.json
+vitest.config.ts
+.eslintrc*
+.prettierrc*
+coverage/
+node_modules/

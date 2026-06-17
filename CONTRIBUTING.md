@@ -20,6 +20,15 @@ npm run build    # tsup
 npm test         # vitest
 ```
 
+## First-time setup gotcha
+
+If `git pull` fails with a `package-lock.json` conflict after running `npm install`,
+run:
+
+```sh
+git stash && git pull && git stash pop && npm install
+```
+
 ## Safety contract — read this first
 
 PST has a strict safety contract that must not be weakened:

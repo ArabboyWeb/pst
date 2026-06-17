@@ -1,7 +1,7 @@
 /**
  * Incompatible plugin — declares apiVersion 999 (not supported by PST).
  */
-import { defineDetectorPlugin } from '../../src/plugin-api/index.js';
+import { defineDetectorPlugin } from '../../dist/plugin-api.js';
 
 export default defineDetectorPlugin({
   manifest: {

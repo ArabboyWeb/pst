@@ -176,8 +176,8 @@ async function loadFromEntry(
   source: 'config' | 'local' | 'auto',
   diagnostics: Diagnostic[],
 ): Promise<LoadedPlugin | null> {
-  // Local path (starts with ./ or ../ or /)
-  if (entry.startsWith('./') || entry.startsWith('../') || entry.startsWith('/')) {
+  // Local path (starts with ./ or ../ or / or Windows drive letter)
+  if (entry.startsWith('./') || entry.startsWith('../') || path.isAbsolute(entry)) {
     const absPath = path.resolve(root, entry);
     return loadFromLocalPath(absPath, source, diagnostics);
   }
