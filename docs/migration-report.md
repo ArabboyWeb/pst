@@ -324,9 +324,9 @@ uvicorn      python         uv            -              high       0
   emits an error diagnostic but continues. This is the intended behavior.
 - **Auto-discovery** scans `node_modules` which can be slow on large projects.
   It's opt-in (`--auto-discover-plugins`) and off by default.
-- **Plugin imports from `pst-cli/plugin-api`**: in development, this requires
+- **Plugin imports from `pst-kit/plugin-api`**: in development, this requires
   `npm link` or the package to be installed. For published plugins, users
-  install `pst-cli` as a peer dependency.
+  install `pst-kit` as a peer dependency.
 
 ### Mitigated risks
 
@@ -343,15 +343,15 @@ uvicorn      python         uv            -              high       0
 mkdir my-plugin
 cd my-plugin
 npm init -y
-npm install pst-cli --save-peer
+npm install pst-kit --save-peer
 ```
 
 ### 2. Write the plugin
 
 ```typescript
 // detector.ts
-import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from 'pst-cli/plugin-api';
-import type { DetectorResult, PluginContext } from 'pst-cli/plugin-api';
+import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from 'pst-kit/plugin-api';
+import type { DetectorResult, PluginContext } from 'pst-kit/plugin-api';
 
 export default defineDetectorPlugin({
   manifest: {

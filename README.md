@@ -33,10 +33,10 @@ never runs anything without showing you first.
 
 ```sh
 # from npm (after publish)
-npm install -g pst-cli
+npm install -g pst-kit
 
 # or run without installing
-npx pst-cli detect .
+npx pst-kit detect .
 
 # or from source
 git clone https://github.com/ArabboyWeb/pst.git
@@ -228,7 +228,7 @@ Create a plugin that implements the `DetectorPlugin` and/or `PlannerPlugin`
 interface:
 
 ```typescript
-import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from 'pst-cli/plugin-api';
+import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from 'pst-kit/plugin-api';
 
 export default defineDetectorPlugin({
   manifest: {

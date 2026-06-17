@@ -66,8 +66,8 @@ cp -r plugins/rust my-plugin
 Then edit `my-plugin/detector.ts`:
 
 ```ts
-import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from 'pst-cli/plugin-api';
-import type { DetectorResult, PluginContext } from 'pst-cli/plugin-api';
+import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from 'pst-kit/plugin-api';
+import type { DetectorResult, PluginContext } from 'pst-kit/plugin-api';
 
 export default defineDetectorPlugin({
   manifest: {
@@ -175,8 +175,8 @@ with any of: languages, frameworks, package managers, manifests, files, env
 files, and entrypoints.
 
 ```ts
-import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from 'pst-cli/plugin-api';
-import type { DetectorResult, PluginContext } from 'pst-cli/plugin-api';
+import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from 'pst-kit/plugin-api';
+import type { DetectorResult, PluginContext } from 'pst-kit/plugin-api';
 
 export default defineDetectorPlugin({
   manifest: {
@@ -262,8 +262,8 @@ export default defineDetectorPlugin({
 A planner converts detection results into concrete commands.
 
 ```ts
-import { definePlannerPlugin, conf, PLUGIN_API_VERSION } from 'pst-cli/plugin-api';
-import type { PlannerInput, PlannerOutput, PluginContext } from 'pst-cli/plugin-api';
+import { definePlannerPlugin, conf, PLUGIN_API_VERSION } from 'pst-kit/plugin-api';
+import type { PlannerInput, PlannerOutput, PluginContext } from 'pst-kit/plugin-api';
 
 export default definePlannerPlugin({
   manifest: {
@@ -408,7 +408,7 @@ Use one of these naming conventions so PST can auto-discover your plugin:
     }
   },
   "peerDependencies": {
-    "pst-cli": ">=0.1.0"
+    "pst-kit": ">=0.1.0"
   },
   "files": ["dist", "README.md"]
 }
@@ -465,7 +465,7 @@ pst detect fixtures/plugin-projects/rust-app \
 Write a test that loads your plugin and runs it against a fixture:
 
 ```ts
-import { PluginManager } from 'pst-cli';
+import { PluginManager } from 'pst-kit';
 
 const pm = new PluginManager({
   root: 'fixtures/my-app',

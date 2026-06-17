@@ -1,5 +1,5 @@
 {
-  "name": "pst-cli",
+  "name": "pst-kit",
   "version": "0.1.0",
   "description": "PST — cross-language project intelligence and deployment assistant. Understand a repo fast. Set it up faster.",
   "type": "module",

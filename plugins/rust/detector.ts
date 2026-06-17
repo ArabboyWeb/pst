@@ -13,8 +13,8 @@
 
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { conf, defineDetectorPlugin, PLUGIN_API_VERSION } from 'pst-cli/plugin-api';
-import type { DetectorResult, PluginContext } from 'pst-cli/plugin-api';
+import { conf, defineDetectorPlugin, PLUGIN_API_VERSION } from 'pst-kit/plugin-api';
+import type { DetectorResult, PluginContext } from 'pst-kit/plugin-api';
 
 async function fileExists(p: string): Promise<boolean> {
   try { const s = await fs.stat(p); return s.isFile(); } catch { return false; }
@@ -81,7 +81,7 @@ export default defineDetectorPlugin({
     owns: ['rust'],
     description: 'Detects Rust projects via Cargo.toml.',
     author: 'PST Contributors',
-    homepage: 'https://github.com/pst-cli/pst',
+    homepage: 'https://github.com/ArabboyWeb/pst',
   },
 
   async detect(ctx: PluginContext): Promise<DetectorResult> {

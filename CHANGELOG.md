@@ -46,7 +46,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   commands, supported workspace kinds, output formats, and diagnostics.
 - **Commands table**: added `pst topology`, `pst graph`, `pst workspace
   inspect` to the commands table.
-- **GitHub repo URL**: updated all references from `pst-cli/pst` to
+- **GitHub repo URL**: updated all references from `pst-kit/pst` to
   `ArabboyWeb/pst` across README, docs, CHANGELOG, CONTRIBUTING, and
   package.json.
 
@@ -118,7 +118,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `DockerDetector`, or `buildPlans`. All detection and planning flows through
   the `PluginManager`.
 - **Package exports**: added `./plugin-api` subpath export so plugins can
-  `import { defineDetectorPlugin } from 'pst-cli/plugin-api'`.
+  `import { defineDetectorPlugin } from 'pst-kit/plugin-api'`.
 - **Build**: `tsup.config.ts` now builds `plugin-api` as a separate entry
   point alongside `index` and `cli`.
 - **Public API**: `src/index.ts` now exports `PluginManager`,

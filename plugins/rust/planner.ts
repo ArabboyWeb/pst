@@ -5,8 +5,8 @@
  * Applies only when Rust is the primary detected language.
  */
 
-import { conf, definePlannerPlugin, PLUGIN_API_VERSION } from 'pst-cli/plugin-api';
-import type { PlannerInput, PlannerOutput, PluginContext } from 'pst-cli/plugin-api';
+import { conf, definePlannerPlugin, PLUGIN_API_VERSION } from 'pst-kit/plugin-api';
+import type { PlannerInput, PlannerOutput, PluginContext } from 'pst-kit/plugin-api';
 
 export default definePlannerPlugin({
   manifest: {
