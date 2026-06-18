@@ -1,43 +1,91 @@
+<div align="center">
+
 # PST — Project Setup Tool
 
-> Understand a repo fast. Set it up faster.
+**Understand a repo fast. Set it up faster.**
 
-PST is a CLI-first open-source tool that scans a repository, detects its stack,
-infers install / run / build / test / deploy steps, identifies missing
-dependencies and environment requirements, and prints **or** safely executes a
-workflow from clone to run / deploy.
+[![npm version](https://img.shields.io/npm/v/pst-kit?color=0ea5e9&style=flat-square)](https://www.npmjs.com/package/pst-kit)
+[![CI](https://img.shields.io/github/actions/workflow/status/ArabboyWeb/pst/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/ArabboyWeb/pst/actions)
+[![License: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE)
+[![Node.js ≥ 18](https://img.shields.io/badge/node-%3E%3D18-f97316?style=flat-square)](https://nodejs.org)
+[![Test coverage](https://img.shields.io/badge/tests-83%20passing-8b5cf6?style=flat-square)](tests/)
 
-It targets four ecosystems:
+PST is a CLI that scans any repository, figures out exactly what it is, and either
+tells you how to set it up — or does it for you, safely, one confirmed step at a time.
 
-- **Node.js** — `npm` / `pnpm` / `yarn`
-- **Python** — `pip` / `poetry` / `uv` / `pipenv`
-- **Go** — `go mod`
-- **Docker** — `Dockerfile` and `docker-compose`
+[Install](#install) · [Quick start](#quick-start) · [Commands](#commands) · [How it works](#how-detection-works) · [Plugin platform](#plugin-platform) · [Contributing](#contributing)
+
+</div>
+
+---
 
 ## Why?
 
-Every new repo you clone burns 5–30 minutes figuring out:
+Every repo you clone burns 5–30 minutes answering the same questions:
 
-- Which package manager does it use?
-- How do I install?
-- How do I run it?
-- Is there a Dockerfile?
-- What env vars do I need?
-- Did I miss something obvious?
+> *Which package manager? How do I install? How do I run it? Is there a Dockerfile? What env vars do I need? Did I miss something obvious?*
 
-PST answers all of those in **under a second**, with **confidence scores**,
-**rationale for every inference**, and a **safe-by-default executor** that
-never runs anything without showing you first.
+PST answers all of them **in under a second** — with confidence scores, evidence for every
+inference, and a safe executor that never runs anything without showing you first.
+
+```
+$ pst detect .
+
+PST — Project Intelligence Report
+Scanned: /my-project
+At:      2026-06-17T12:07:01Z
+Overall: high (0.96)
+
+Languages
+  • Node.js  — high (0.97)
+      evidence: package.json, package-lock.json
+
+Frameworks
+  • Express — high (0.75)
+      evidence: dep:express
+  • React   — high (0.75)
+      evidence: dep:react
+
+Package managers
+  • npm (binary: npm) — high (0.95)
+      lockfiles: package-lock.json
+
+Install plan     $ npm install
+Run plan         $ npm run dev
+Build plan       $ npm run build
+```
+
+---
+
+## Table of Contents
+
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Supported stacks](#supported-stacks)
+- [Commands](#commands)
+- [Flags](#common-flags)
+- [Output formats](#output-formats)
+- [Safety model](#safety-model)
+- [How detection works](#how-detection-works)
+- [Monorepo support](#workspace-intelligence-monorepo-support)
+- [Plugin platform](#plugin-platform)
+- [Development](#development)
+- [Contributing](#contributing)
+- [Roadmap](#roadmap)
+- [License](#license)
+
+---
 
 ## Install
 
 ```sh
+# Global install — recommended
 npm install -g pst-kit
 
-# or run without installing
+# Run without installing
 npx pst-kit detect .
 
-# or from source
+# From source
 git clone https://github.com/ArabboyWeb/pst.git
 cd pst
 npm install
@@ -45,189 +93,291 @@ npm run build
 node dist/cli.js detect .
 ```
 
-PST requires Node.js 18 or newer.
+> **Requires Node.js 18 or newer.** Run `node --version` to check.
+
+---
 
 ## Quick start
 
 ```sh
-# One command to rule them all
-pst go . --dry-run    # preview what will happen
-pst go .              # do it (asks for confirmation)
-
-# Or step by step:
-pst detect .          # 1. What is this repo?
-pst plan .            # 2. Show me the full plan (no execution)
-pst install .         # 3. Install (asks before running anything)
-pst run .             # 4. Run it
-pst doctor .          # 5. Check the local runtime can satisfy the plan
-pst explain . --only install  # 6. Why did you pick that command?
-```
-
-## Supported stacks
-
-| Language  | Manifests / Lockfiles                                  | Package managers              |
-| --------- | ------------------------------------------------------ | ----------------------------- |
-| Node.js   | `package.json`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` | `npm`, `pnpm`, `yarn`        |
-| Python    | `pyproject.toml`, `requirements.txt`, `setup.py`, `Pipfile`, `poetry.lock`, `uv.lock` | `pip`, `poetry`, `uv`, `pipenv` |
-| Go        | `go.mod`, `go.sum`                                     | Go modules                    |
-| Docker    | `Dockerfile`, `docker-compose.yml`, `compose.yml`      | `docker`, `docker compose`    |
-
-Frameworks recognized:
-
-- **Node:** Next.js, Remix, Nuxt, SvelteKit, React, Vue, NestJS, Fastify, Express
-- **Python:** FastAPI, Django, Flask (detected from dependencies, project name, or canonical files like `manage.py`)
-
-## Quickest start
-
-```sh
+# Fastest possible: one command, handles everything
 git clone <any-repo>
 cd <any-repo>
 pst go .
 ```
 
-That's it. PST detects the stack, checks your runtimes, shows the full plan,
-asks for confirmation, then installs, builds, and runs the project in one shot.
+PST detects the stack, checks your local runtimes, shows the full plan, asks for
+confirmation, then installs, builds, and runs the project in one shot.
+
+**Or step by step, if you prefer full control:**
+
+```sh
+pst detect .                       # What is this repo?
+pst plan .                         # Show every planned command (nothing runs)
+pst doctor .                       # Does my machine have what's needed?
+pst explain . --only install       # Why did you pick that install command?
+pst install .                      # Install dependencies (asks first)
+pst run .                          # Start the project (asks first)
+```
+
+**Preview before you commit:**
+
+```sh
+pst go . --dry-run                 # See exactly what pst go would do, execute nothing
+pst deploy-all . --dry-run         # Full CI/CD chain preview
+```
+
+---
+
+## Supported stacks
+
+| Language | Manifests / Lockfiles | Package managers |
+|---|---|---|
+| **Node.js** | `package.json`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` | `npm`, `pnpm`, `yarn` |
+| **Python** | `pyproject.toml`, `requirements.txt`, `setup.py`, `Pipfile`, `poetry.lock`, `uv.lock` | `pip`, `poetry`, `uv`, `pipenv` |
+| **Go** | `go.mod`, `go.sum` | Go modules |
+| **Docker** | `Dockerfile`, `docker-compose.yml`, `compose.yml` | `docker`, `docker compose` |
+
+**Frameworks recognized:**
+
+Node.js — Next.js, Remix, Nuxt, SvelteKit, React, Vue, NestJS, Fastify, Express
+
+Python — FastAPI, Django, Flask (detected from dependencies, project name, or canonical files like `manage.py`)
+
+Other languages (Rust, Ruby, Java, PHP, .NET, Elixir) are supported via the [plugin platform](#plugin-platform).
+
+---
 
 ## Commands
 
-| Command            | Purpose                                                          |
-| ------------------ | ---------------------------------------------------------------- |
-| `pst detect [path]`   | Detect stack, manifests, env files. Print a summary.            |
-| `pst inspect [path]`  | Alias of `detect`.                                               |
-| `pst plan [path]`     | Print the full install/run/build/test/deploy plan.              |
-| `pst go [path]`       | One-shot: detect → doctor → install → build → run.             |
-| `pst deploy-all [path]`| One-shot for CI/CD: detect → doctor → install → build → deploy (dry-run default). |
-| `pst install [path]`  | Execute the install plan (asks first unless `--force`).         |
-| `pst run [path]`      | Execute the run plan.                                            |
-| `pst build [path]`    | Execute the build plan.                                          |
-| `pst test [path]`     | Execute the test plan.                                           |
-| `pst deploy [path]`   | Print or run the deploy plan. **Defaults to dry-run.**          |
-| `pst doctor [path]`   | Check that local binaries satisfy the detected stack.           |
-| `pst explain [path]`  | Explain *why* each inference was made, with confidence scores.  |
-| `pst topology [path]` | Analyze a monorepo: packages, dependency graph, build order.   |
-| `pst graph [path]`    | Print the workspace dependency graph (defaults to Graphviz DOT).|
-| `pst workspace inspect <id> [path]` | Inspect a single workspace package in detail.     |
-| `pst plugins list/inspect/validate` | Manage PST plugins.                              |
+### Core commands
 
-### Common flags
+| Command | What it does |
+|---|---|
+| `pst detect [path]` | Detect stack, manifests, env files. Print a full intelligence report. |
+| `pst inspect [path]` | Alias of `detect`. |
+| `pst plan [path]` | Print the complete install / run / build / test / deploy plan. Nothing executes. |
+| `pst explain [path]` | Show *why* each inference was made, with confidence scores and evidence. |
+| `pst doctor [path]` | Check that your local binaries can satisfy the detected stack. |
 
-| Flag                    | Applies to                              | Effect                                                  |
-| ----------------------- | --------------------------------------- | ------------------------------------------------------- |
-| `-f, --format <fmt>`    | `detect`, `inspect`, `plan`, `deploy`, `go`, `deploy-all` | Output format: `text` (default), `json`, `markdown`     |
-| `-n, --dry-run`         | `install`, `run`, `build`, `test`, `deploy`, `go`, `deploy-all` | Print commands without executing                     |
-| `-y, --force`           | `install`, `run`, `build`, `test`, `deploy`, `go`, `deploy-all` | Skip confirmation prompts (deploy requires this to execute) |
-| `--offline`             | all commands with `[path]`              | Skip runtime binary presence checks (fully hermetic)    |
-| `--only <kind>`         | `plan`, `explain`                       | Filter to `install,run,build,test,deploy` (comma-separated) |
-| `--skip-build`          | `go`                                    | Skip the build step even if a build plan exists         |
-| `--env <environment>`   | `deploy-all`                            | Deployment target hint: staging, production, preview    |
-| `--debug`               | all commands                            | Enable debug logging (verbose, includes parser internals) |
-| `--silent`              | all commands                            | Suppress all logging except errors                      |
+### Execution commands
+
+| Command | What it does |
+|---|---|
+| `pst install [path]` | Run the install plan. Asks for confirmation unless `--force`. |
+| `pst run [path]` | Run the run plan. Asks for confirmation unless `--force`. |
+| `pst build [path]` | Run the build plan. Asks for confirmation unless `--force`. |
+| `pst test [path]` | Run the test plan. Asks for confirmation unless `--force`. |
+| `pst deploy [path]` | Print or run the deploy plan. **Dry-run by default.** Requires `--force` to execute. |
+
+### One-shot commands
+
+| Command | What it does |
+|---|---|
+| `pst go [path]` | **Detect → doctor → install → build → run.** One shot, one confirmation. |
+| `pst deploy-all [path]` | **Detect → doctor → install → build → deploy.** Deploy is dry-run by default. For CI/CD pipelines. |
+
+### Monorepo commands
+
+| Command | What it does |
+|---|---|
+| `pst topology [path]` | Full monorepo report: packages, dependency graph, build order, diagnostics. |
+| `pst graph [path]` | Print the workspace dependency graph (Graphviz DOT by default). |
+| `pst workspace inspect <id> [path]` | Inspect a single workspace package in detail. |
+
+### Plugin commands
+
+| Command | What it does |
+|---|---|
+| `pst plugins list [path]` | List all loaded plugins. |
+| `pst plugins inspect <id> [path]` | Inspect a single plugin. |
+| `pst plugins validate [path]` | Validate all loaded plugins. |
+
+---
+
+## Common flags
+
+| Flag | Applies to | Effect |
+|---|---|---|
+| `-f, --format <fmt>` | `detect`, `plan`, `go`, `deploy-all`, `topology` | Output format: `text` (default) · `json` · `markdown` |
+| `-n, --dry-run` | all execution commands | Print commands without running any of them |
+| `-y, --force` | all execution commands | Skip confirmation prompts. Deploy requires this to actually run. |
+| `--offline` | all commands | Skip binary presence checks — useful for CI and air-gapped environments |
+| `--only <kind>` | `plan`, `explain` | Filter output to `install,run,build,test,deploy` (comma-separated) |
+| `--skip-build` | `go` | Skip the build step even when a build plan exists |
+| `--env <environment>` | `deploy-all` | Deployment target hint: `staging` · `production` · `preview` |
+| `--debug` | all commands | Verbose logging — includes parser internals |
+| `--silent` | all commands | Suppress everything except errors |
+
+---
 
 ## Output formats
 
-PST supports three output formats. They are designed so you can pipe them into
-other tools, save them as build artifacts, or attach them to PRs.
+All commands support three output formats — designed so you can pipe them into other
+tools, save them as build artifacts, or embed them directly in PRs.
 
-### Text (default, terminal-friendly with color)
+### Text (default)
+
+Terminal-friendly, colored output. What you see in your shell every day.
 
 ```sh
 pst detect .
 ```
 
-### JSON (machine-readable, schema-stable)
+### JSON — machine-readable, schema-stable
 
 ```sh
 pst detect . --format json > pst-scan.json
+pst plan .   --format json | jq '.plans.install'
 ```
 
-### Markdown (for docs, PRs, READMEs)
+### Markdown — for docs, PRs, and READMEs
 
 ```sh
-pst detect . --format markdown > docs/scan.md
+pst detect . --format markdown > docs/stack-report.md
+pst plan .   --format markdown >> CONTRIBUTING.md
 ```
+
+### DOT — for monorepo graphs
+
+```sh
+pst graph . --format dot | dot -Tpng > dependency-graph.png
+pst graph . --format dot | dot -Tsvg > dependency-graph.svg
+```
+
+---
 
 ## Safety model
 
-PST is **safe by default**. The full contract:
+PST is **safe by default**. Every part of this contract is permanent — it cannot be
+overridden by configuration, and contributions that weaken it will not be merged.
 
-1. **Plan over execute.** `detect`, `inspect`, `plan`, `explain`, and `doctor`
-   never spawn child processes.
-2. **Always show first.** Every command that *can* execute prints the exact
-   shell command before running it.
-3. **Confirm unless forced.** `install` / `run` / `build` / `test` prompt for
-   confirmation when stdin is a TTY. Pass `--force` to skip.
-4. **Non-interactive guard.** If stdin is **not** a TTY and `--force` is not
-   set, PST refuses to execute and prints a clear message. This prevents
-   accidental execution in CI pipes.
-5. **Deploy is dry-run by default.** `pst deploy` prints the plan and exits.
-   You must pass `--force` to actually execute the deploy.
-6. **Dangerous-command blocklist.** PST refuses to execute commands that match
-   destructive patterns (`rm -rf /`, `mkfs`, `dd of=/dev/`, fork bombs,
-   `curl ... | sh`, etc.) — **even with `--force`**. See the full list in
-   `src/executor/executor.ts`.
-7. **Never destructive.** PST never edits, deletes, or rewrites user files.
-   It only suggests commands.
-8. **Offline mode.** `--offline` skips all `which`/`--version` probes so the
-   tool is fully hermetic — useful for CI, air-gapped environments, and
-   reproducible scans.
-9. **Timeout.** Every executed command has a 5-minute timeout. On timeout,
-   PST sends SIGTERM, then SIGKILL after 3 seconds.
+**1. Plan-only commands never spawn processes.**
+`detect`, `inspect`, `plan`, `explain`, and `doctor` are fully read-only. They never
+start a child process, write a file, or make a network call.
+
+**2. Always show before running.**
+Every execution command prints the exact shell command before running it — no
+hidden behavior.
+
+**3. Always confirm before executing.**
+`install`, `run`, `build`, and `test` prompt for confirmation when stdin is a TTY.
+Pass `--force` (or `-y`) to skip.
+
+**4. Refuses to run in non-interactive mode without `--force`.**
+If stdin is not a TTY and `--force` is not set, PST refuses and prints a clear
+message. This prevents silent execution in CI pipes.
+
+**5. Deploy is dry-run by default.**
+`pst deploy` prints the plan and exits. You must pass `--force` to actually execute
+a deploy step.
+
+**6. Dangerous-command blocklist — cannot be bypassed, even with `--force`.**
+PST refuses to execute commands matching destructive patterns: `rm -rf /`, `mkfs`,
+`dd of=/dev/`, fork bombs, `curl ... | sh`, and others. See the full list in
+[`src/executor/executor.ts`](src/executor/executor.ts).
+
+**7. PST never edits, deletes, or rewrites your files.**
+It only suggests commands. You remain in full control.
+
+**8. Offline mode.**
+`--offline` skips all `which` / `--version` probes, making PST fully hermetic —
+useful for CI, air-gapped environments, and reproducible scans.
+
+**9. Timeouts.**
+Every executed command has a 5-minute timeout. On timeout, PST sends `SIGTERM`,
+then `SIGKILL` after 3 seconds.
+
+---
 
 ## How detection works
 
-PST uses a **layered detection strategy**:
+PST uses a **7-layer detection strategy**, building confidence progressively:
 
-1. **File presence** — Does `package.json`, `pyproject.toml`, `go.mod`,
-   `Dockerfile`, etc. exist at the project root?
-2. **Manifest parsing** — What does the manifest actually say? Which scripts
-   and dependencies are declared?
-3. **Script inspection** — For Node, what does `scripts.dev/start/build/test`
-   contain?
-4. **Framework conventions** — Does `next.config.mjs` exist alongside a `next`
-   dependency? Both signals boost confidence.
-5. **README hints** — Code blocks containing `KEY=VALUE` patterns contribute
-   to env-var discovery.
-6. **Docker / CI hints** — Presence of a root `Dockerfile`, `compose.yml`, or
-   `.github/workflows/` modifies the deploy plan.
-7. **Confidence scoring** — Every detection carries a `score` (0.0–1.0) and
-   a `level` (`high` / `medium` / `low`). The reporter always shows them.
+```
+Layer 1 — File presence      Does package.json / pyproject.toml / go.mod / Dockerfile exist?
+Layer 2 — Manifest parsing   What does the manifest actually declare?
+Layer 3 — Script inspection  What do scripts.dev / start / build / test contain?
+Layer 4 — Framework signals  Does next.config.mjs exist alongside a next dependency?
+Layer 5 — README hints       Code blocks with KEY=VALUE patterns → env var discovery
+Layer 6 — Docker / CI hints  Root Dockerfile, compose.yml, .github/workflows/
+Layer 7 — Confidence scoring Final score (0.0–1.0) and level (high / medium / low)
+```
 
-When PST is uncertain, it returns multiple likely options with their
-confidences — it never pretends to know more than it does.
+When PST is uncertain, it returns multiple likely options with their confidence scores.
+It never pretends to know more than it does.
 
 ### Confidence calibration
 
-| Score range | Level   | Meaning                                              |
-| ----------- | ------- | ---------------------------------------------------- |
-| ≥ 0.75      | high    | Strong signal(s); safe to auto-execute               |
-| 0.45–0.74   | medium  | Plausible; show to user, ask before executing        |
-| < 0.45      | low     | Weak; treat as a hint, not a conclusion              |
+| Score | Level | Meaning |
+|---|---|---|
+| ≥ 0.75 | **high** | Strong signal — safe to auto-execute |
+| 0.45–0.74 | **medium** | Plausible — show to user, ask before running |
+| < 0.45 | **low** | Weak hint — do not auto-execute |
 
-Examples of calibration:
+**Examples:**
 
-- Root `package.json` with runtime dependencies → Node.js at **0.97** (high)
-- Root `package.json` with only devDependencies and no framework → Node.js at **0.55** (medium) — likely tooling-only (e.g. Django's JS test tooling)
-- Subdirectory `package.json` → Node.js at **0.55** (medium)
-- No lockfile → npm at **0.55** (medium), with a note
-- Root `Dockerfile` only (no language manifest) → Docker at **0.92** (high)
-- Subdirectory `Dockerfile` only → Docker **not** detected as primary; info diagnostic emitted
+| Scenario | Score | Level |
+|---|---|---|
+| Root `package.json` with runtime deps | 0.97 | high |
+| Root `package.json`, devDeps only, no framework | 0.55 | medium — likely tooling only |
+| Subdirectory `package.json` only | 0.55 | medium |
+| Root `Dockerfile`, no language manifest | 0.92 | high |
+| No lockfile present | 0.55 | medium — inferred, not confirmed |
+| Subdirectory `Dockerfile` only | — | not detected as primary; info diagnostic emitted |
 
-For a deeper dive, see [docs/architecture.md](docs/architecture.md).
+For the full design, see [docs/architecture.md](docs/architecture.md).
+
+---
+
+## Workspace intelligence (monorepo support)
+
+PST understands monorepos as **systems of packages** — not just single projects.
+It builds a dependency graph, computes topological build order, and flags structural
+problems automatically.
+
+### Supported workspace types
+
+| Type | Detected via |
+|---|---|
+| pnpm workspace | `pnpm-workspace.yaml` |
+| Yarn workspace | `package.json` `workspaces` field |
+| Turborepo | workspaces field + `turbo.json` |
+| Nx | workspaces field + `nx.json` (or `nx.json` alone) |
+| Lerna | workspaces field + `lerna.json` |
+
+### What it detects
+
+| Diagnostic | Severity |
+|---|---|
+| Circular dependencies | error |
+| Missing workspace references | warn |
+| Duplicate package names | warn |
+| Orphan packages (nothing depends on them) | info |
+
+### Commands
+
+```sh
+pst topology .                          # Full report: packages, graph, build order, diagnostics
+pst graph . --format dot                # Graphviz DOT — pipe to dot -Tpng > graph.png
+pst workspace inspect @my-org/web .     # Deep inspect one package
+```
+
+### Performance
+
+Handles 500+ packages and 100k+ files. A 50-package linear chain scans in under 3 seconds.
+
+---
 
 ## Plugin platform
 
-PST is plugin-driven. All built-in detectors (Node, Python, Go, Docker) and
-the built-in planner run through the same plugin pipeline as third-party
-plugins. This means you can add new language support **without modifying PST
-core**.
+Every built-in detector (Node, Python, Go, Docker) runs through the same plugin
+pipeline as third-party plugins. You can add language support without touching PST core.
 
-### Adding a language
-
-Create a plugin that implements the `DetectorPlugin` and/or `PlannerPlugin`
-interface:
+### Creating a plugin
 
 ```typescript
-import { defineDetectorPlugin, conf, PLUGIN_API_VERSION } from 'pst-kit/plugin-api';
+import { defineDetectorPlugin, PLUGIN_API_VERSION } from 'pst-kit/plugin-api';
 
 export default defineDetectorPlugin({
   manifest: {
@@ -240,121 +390,51 @@ export default defineDetectorPlugin({
     owns: ['rust'],
   },
   async detect(ctx) {
-    // ... detect Cargo.toml, return languages/packageManagers/etc.
+    const hasCargoToml = await ctx.fileExists('Cargo.toml');
+    if (!hasCargoToml) return null;
+
+    return {
+      languages: [{
+        name: 'Rust',
+        id: 'rust',
+        score: 0.97,
+        evidence: ['Cargo.toml'],
+      }],
+    };
   },
 });
 ```
 
 ### Loading plugins
 
-Three ways to load plugins:
+Three ways — pick the one that fits your workflow:
 
-1. **`pst.config.json`** at your project root:
-   ```json
-   { "plugins": ["pst-plugin-rust", "./plugins/my-plugin.ts"] }
-   ```
-
-2. **Auto-discovery** (opt-in): PST scans `node_modules` for `pst-plugin-*`
-   and `@*/pst-plugin-*` packages.
-   ```sh
-   pst detect . --auto-discover-plugins
-   ```
-
-3. **Programmatic**: pass `pluginPaths` to `scanProject()`.
-
-### Plugin commands
-
-```sh
-pst plugins list .           # list all loaded plugins
-pst plugins inspect rust .   # inspect a single plugin
-pst plugins validate .       # validate all plugins
+**1. `pst.config.json` at your project root:**
+```json
+{
+  "plugins": ["pst-plugin-rust", "./plugins/my-custom-plugin.ts"]
+}
 ```
 
-### Reference plugin
-
-`plugins/rust/` contains a complete Rust plugin (detector + planner) that
-adds `cargo fetch` / `cargo build` / `cargo run` / `cargo test` support
-without touching PST core.
-
-See [docs/plugin-development.md](docs/plugin-development.md) for the full
-guide, and [docs/migration-report.md](docs/migration-report.md) for the
-platform migration details.
-
-## Workspace intelligence (monorepo support)
-
-PST understands modern monorepos as **systems of packages**, not just single
-projects. It detects workspace topology, builds a dependency graph, computes
-topological build order, and generates workspace-level plans.
-
-### Supported workspace kinds
-
-| Kind | Detected via |
-|------|-------------|
-| pnpm workspace | `pnpm-workspace.yaml` |
-| yarn workspace | `package.json` `workspaces` field |
-| Turborepo | `package.json` workspaces + `turbo.json` |
-| Nx | `package.json` workspaces + `nx.json` (or `nx.json` alone) |
-| Lerna | `package.json` workspaces + `lerna.json` |
-
-### Commands
-
+**2. npm auto-discovery (opt-in):**
 ```sh
-# Full topology report (packages, graph, build order, plans, diagnostics)
-pst topology .
+pst detect . --auto-discover-plugins
+```
+PST scans `node_modules` for `pst-plugin-*` and `@*/pst-plugin-*` packages.
 
-# Dependency graph in Graphviz DOT format (pipe to `dot -Tpng > graph.png`)
-pst graph . --format dot
-
-# Inspect a single package
-pst workspace inspect @my-org/web .
+**3. Programmatic (for library users):**
+```typescript
+import { scanProject } from 'pst-kit';
+const result = await scanProject('.', { pluginPaths: ['./my-plugin.ts'] });
 ```
 
-### Output formats
+### Reference implementation
 
-- `text` (default) — terminal-friendly report
-- `json` — machine-readable, schema-stable
-- `markdown` — for docs and PRs
-- `dot` — Graphviz format for visualization
+`plugins/rust/` contains a complete Rust plugin (detector + planner) with
+`cargo fetch` / `cargo build` / `cargo run` / `cargo test` support.
+See [docs/plugin-development.md](docs/plugin-development.md) for the full guide.
 
-### Diagnostics
-
-PST detects:
-- **Circular dependencies** (error severity)
-- **Orphan packages** — packages nothing depends on (info)
-- **Missing references** — a package declares a workspace dep that doesn't exist (warn)
-- **Duplicate names** — two packages with the same name (warn)
-
-### Performance
-
-Handles 500+ packages and 100k+ files. A 50-package linear chain scans in
-under 3 seconds.
-
-## Limitations
-
-PST is an MVP. The following are **out of scope** for v0.1:
-
-- **No built-in support for** Ruby, Java, PHP, .NET, Elixir. These can be
-  added via plugins (Rust is supported via the reference `pst-plugin-rust`).
-- **No transitive dependency resolution.** PST reads manifests only; it does
-  not compute the full dependency tree.
-- **No plugin marketplace.** Plugins are loaded from `pst.config.json`,
-  local paths, or npm auto-discovery — there is no central registry yet.
-- **No remote SaaS or dashboard.** PST is CLI-only.
-- **No deep AST analysis.** Manifest and config inference only.
-- **No automatic file editing.** PST only suggests; you run.
-- **No workspace / monorepo first-class support.** Multi-package repos work
-  (PST detects the root manifest), but per-workspace plans are not generated.
-- **Subdirectory manifests are secondary.** PST prefers root manifests; a
-  subdirectory `package.json` is recorded but does not flip the primary
-  language.
-- **Subdirectory Dockerfiles are ignored for planning.** Only root
-  `Dockerfile` / `compose.yml` trigger Docker-driven plans. (This prevents
-  test fixtures from hijacking detection.)
-
-## Examples
-
-See [`examples/`](examples/) for sample outputs of every command against every
-fixture, and [`fixtures/`](fixtures/) for the input repos.
+---
 
 ## Development
 
@@ -363,20 +443,19 @@ git clone https://github.com/ArabboyWeb/pst.git
 cd pst
 npm install
 
-# build
-npm run build
-
-# watch
-npm run dev
-
-# type-check
-npm run lint
-
-# tests
-npm test
-npm run test:watch
-npm run test:coverage
+npm run build          # production build (tsup)
+npm run dev            # watch mode
+npm run lint           # TypeScript type check
+npm test               # run all 83 tests
+npm run test:watch     # watch mode
+npm run test:coverage  # coverage report
 ```
+
+> **First-time setup note:** If `git pull` fails with a `package-lock.json` conflict
+> after running `npm install`, resolve it with:
+> ```sh
+> git stash && git pull && git stash pop && npm install
+> ```
 
 ### Project structure
 
@@ -385,64 +464,105 @@ pst/
 ├── src/
 │   ├── bin.ts                  # CLI entry (shebang)
 │   ├── cli/
-│   │   ├── cli.ts              # commander program
+│   │   ├── cli.ts              # Commander program — all command definitions
 │   │   └── version.ts
 │   ├── core/
-│   │   └── orchestrator.ts     # scanProject()
+│   │   └── orchestrator.ts     # scanProject() — coordinates all layers
 │   ├── detectors/
 │   │   ├── types.ts            # Detector interface + DetectorContext
 │   │   ├── node.ts             # Node.js + npm/pnpm/yarn
 │   │   ├── python.ts           # Python + pip/poetry/uv/pipenv
 │   │   ├── go.ts               # Go modules
 │   │   ├── docker.ts           # Dockerfile + compose
-│   │   └── generic.ts          # env files, CI files, README
+│   │   └── generic.ts          # env files, CI files, README hints
 │   ├── planner/
 │   │   └── planner.ts          # buildPlans() — install/run/build/test/deploy
 │   ├── executor/
 │   │   └── executor.ts         # safe run / dry-run / confirm / blocklist
 │   ├── reporter/
-│   │   └── reporter.ts         # text / json / markdown
+│   │   └── reporter.ts         # text / json / markdown output
+│   ├── plugin-api/
+│   │   └── index.ts            # defineDetectorPlugin, definePlannerPlugin
 │   ├── types/
-│   │   └── index.ts            # all data model types
-│   ├── utils/
-│   │   ├── fs.ts               # filesystem helpers
-│   │   ├── parsing.ts          # JSON/JSON5/TOML (strict + lenient) / YAML / env / requirements
-│   │   ├── validation.ts       # zod schemas for manifests
-│   │   ├── confidence.ts       # score → level mapping
-│   │   ├── logger.ts           # info/warn/error/debug
-│   │   ├── runtime.ts          # which(), versionOf()
-│   │   └── constants.ts        # manifest filenames, entrypoint candidates
-│   └── index.ts                # library export
-├── tests/                      # 14 vitest suites, 83 tests
+│   │   └── index.ts            # all shared data model types
+│   └── utils/
+│       ├── fs.ts               # filesystem helpers
+│       ├── parsing.ts          # JSON5 / TOML / YAML / env / requirements parsing
+│       ├── validation.ts       # Zod schemas for manifests
+│       ├── confidence.ts       # score → level mapping
+│       ├── logger.ts           # info / warn / error / debug
+│       ├── runtime.ts          # which(), versionOf()
+│       └── constants.ts        # manifest filenames, entrypoint candidates
+├── tests/                      # 14 Vitest suites, 83 tests
 ├── fixtures/                   # 13 sample repos (node, python, go, docker, multi-stack, edge cases)
+├── plugins/rust/               # reference Rust plugin
 ├── docs/
 │   ├── architecture.md
+│   ├── plugin-development.md
+│   ├── migration-report.md
 │   └── roadmap.md
-├── examples/                   # sample outputs for every command × every fixture
+├── examples/                   # sample output for every command × every fixture
 ├── scripts/
 │   └── realworld.js            # validation harness for real-world repos
-├── .github/workflows/ci.yml    # Node 18/20/22/24 matrix
-├── package.json
-├── tsconfig.json
-├── tsup.config.ts
-└── vitest.config.ts
+└── .github/workflows/
+    ├── ci.yml                  # Node 18 / 20 / 22 / 24 matrix
+    └── publish.yml             # npm publish on version tag
 ```
+
+---
 
 ## Contributing
 
-Pull requests welcome. Please:
+Pull requests are welcome. Before you start:
 
-1. Open an issue first for non-trivial changes.
-2. Keep detectors small and focused — one language per file.
-3. Add tests for any new detection rule. The test suite includes fixtures for
-   happy paths, failure cases, and ambiguous repos.
-4. Run `npm run lint && npm test` before pushing.
-5. Never weaken the safety contract (see "Safety model" above). Changes to
-   the executor's blocklist or confirmation logic require explicit review.
+1. **Open an issue first** for any non-trivial change — discuss approach before coding.
+2. **One language per detector file.** Keep detectors small and focused.
+3. **Tests are required.** Every new detection rule needs a test. Fixtures live in `fixtures/`.
+4. **Run `npm run lint && npm test` before pushing.** Both must pass.
+5. **Never weaken the safety contract.** Changes to the executor's blocklist or confirmation
+   logic require explicit review and will not be merged lightly.
+6. **Confidence scores must follow the calibration table.** Do not inflate scores —
+   honesty about uncertainty is a core feature, not a bug.
 
-See [docs/architecture.md](docs/architecture.md) for the full design and
-extension guide.
+For a deep dive into the architecture, extension points, and design decisions,
+see [docs/architecture.md](docs/architecture.md).
+
+---
+
+## Roadmap
+
+PST v0.1 is a focused MVP. The following are **out of scope for this release** but
+planned or plugin-solvable:
+
+| Feature | Status |
+|---|---|
+| Ruby, Java, PHP, .NET, Elixir built-in detectors | Planned — or add via plugin |
+| Rust built-in detector | Already available as `plugins/rust/` |
+| Plugin marketplace / central registry | Planned for v0.2 |
+| Transitive dependency resolution | Not planned — manifest-level is sufficient for setup |
+| Per-workspace plans in monorepos | Topology analysis exists; per-package execution planned |
+| Remote dashboard or SaaS | Not planned — CLI-only by design |
+| Deep AST analysis | Out of scope |
+| `pst init` — interactive config generator | Planned for v0.2 |
+| Update check (`pst update`) | Planned for v0.2 |
+| LSP / JSON Schema for `pst.config.json` | Planned |
+
+**Known v0.1 constraints:**
+
+- Subdirectory manifests are secondary — root manifests are always preferred.
+- Subdirectory Dockerfiles do not trigger Docker planning (they are treated as fixtures).
+  Add a root `Dockerfile` to enable Docker planning.
+
+---
 
 ## License
 
 MIT © PST Contributors
+
+---
+
+<div align="center">
+
+If PST saved you time, give it a ⭐ — it helps others find it.
+
+</div>
