@@ -32,7 +32,6 @@ never runs anything without showing you first.
 ## Install
 
 ```sh
-# from npm (after publish)
 npm install -g pst-kit
 
 # or run without installing
